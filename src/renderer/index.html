@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KidScreen - ניהול זמן מסך</title>
+    <link rel="icon" type="image/png" href="../../ICON.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Custom Title Bar -->
+    <div class="titlebar">
+        <div class="titlebar-drag">
+            <span class="app-title">🛡️ KidScreen</span>
+        </div>
+        <div class="titlebar-buttons">
+            <button class="titlebar-btn minimize" onclick="window.api.minimize()">─</button>
+            <button class="titlebar-btn maximize" onclick="window.api.maximize()">□</button>
+            <button class="titlebar-btn close" onclick="window.api.close()">✕</button>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="login-logo">🛡️</div>
+            <h1>KidScreen</h1>
+            <p class="subtitle">הרוויח את הזמן שלך במחשב!</p>
+            
+            <form id="login-form" class="auth-form">
+                <div class="input-group">
+                    <input type="text" id="login-username" placeholder="שם משתמש" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="login-password" placeholder="סיסמה" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">כניסה</button>
+            </form>
+            
+            <p class="auth-switch" id="forgot-link-row">שכחת סיסמה? <a href="#" id="show-forgot">לחץ כאן</a></p>
+            <p class="auth-switch">אין לך חשבון? <a href="#" id="show-register">הירשם עכשיו</a></p>
+            
+            <form id="register-form" class="auth-form hidden">
+                <p class="auth-form-title">יצירת חשבון מנהל 🔐</p>
+                <div class="input-group">
+                    <input type="text" id="register-username" placeholder="שם משתמש (באנגלית)" required dir="ltr" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="register-password" placeholder="סיסמה" required>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="register-pin" placeholder="קוד הורים — 4 ספרות" maxlength="4" inputmode="numeric" pattern="\d{4}" required dir="ltr">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">✓ צור חשבון מנהל</button>
+            </form>
+            
+            <p id="show-login-text" class="auth-switch hidden">יש לך חשבון? <a href="#" id="show-login">התחבר</a></p>
+
+            <!-- Password Recovery Panel -->
+            <div id="recovery-panel" class="auth-form hidden">
+                <p class="auth-form-title">🔑 שחזור גישה</p>
+
+                <!-- Stage 1: PIN -->
+                <div id="recovery-stage-pin">
+                    <p style="text-align:center;font-size:0.9em;color:var(--text-secondary);margin-bottom:12px">הזן את קוד ה-PIN שהגדרת בעת ההרשמה</p>
+                    <div class="input-group">
+                        <input type="text" id="recovery-pin" placeholder="קוד PIN (4 ספרות)" maxlength="4" inputmode="numeric" dir="ltr" class="">
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="submitRecoveryPin()">✓ אמת ​PIN</button>
+                </div>
+
+                <!-- Stage 2: Family Code -->
+                <div id="recovery-stage-family" class="hidden">
+                    <p style="text-align:center;font-size:0.9em;color:var(--text-secondary);margin-bottom:4px">קוד ה-PIN לא תאם.</p>
+                    <p style="text-align:center;font-size:0.9em;color:var(--text-secondary);margin-bottom:12px">הזן את קוד הסנכרון המשפחתי שלך</p>
+                    <div class="input-group">
+                        <input type="text" id="recovery-family-id" placeholder="קוד סנכרון משפחתי" dir="ltr">
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="submitRecoveryFamily()">✓ אמת קוד</button>
+                </div>
+
+                <!-- Stage 3: Uninstall -->
+                <div id="recovery-stage-reinstall" class="hidden">
+                    <p style="text-align:center;font-size:1.1em;color:var(--text-danger, #ff6b6b);margin-bottom:8px">⚠️ לא הצלחנו לאמת את זהותך.</p>
+                    <p style="text-align:center;font-size:0.85em;color:var(--text-secondary);margin-bottom:16px">האפשרות היחידה היא הסרת ההתקנה של האפליקציה.<br>ההורים <strong>יראו</strong> שהאפליקציה הוסרה.</p>
+                    <button class="btn btn-danger btn-full" onclick="startUninstallCountdown()">🗑️ הסר את ההתקנה</button>
+                </div>
+
+                <div id="recovery-error" class="error-message hidden" style="margin-top:8px"></div>
+                <button id="recovery-cancel-btn" class="btn btn-outline btn-full" style="margin-top:10px" onclick="cancelRecovery()">← חזור להתחברות</button>
+            </div>
+
+    <!-- Uninstall countdown — full screen, no cancel -->
+    <div id="uninstall-overlay" class="hidden" style="position:fixed;inset:0;background:#0a0a0a;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;">
+        <div style="font-size:4rem;margin-bottom:16px">🗑️</div>
+        <h2 style="font-size:1.4rem;margin-bottom:8px;color:#ff6b6b">מסיר את ההתקנה...</h2>
+        <p style="color:#888;margin-bottom:28px;text-align:center">פעולה זו אינה הפיכה.<br>האפליקציה תיסגר בעוד:</p>
+        <div id="uninstall-countdown" style="font-size:5rem;font-weight:bold;color:#ff6b6b;line-height:1">5</div>
+        <p style="color:#555;font-size:0.8em;margin-top:24px">ההורים יראו שהאפליקציה הוסרה מהמחשב</p>
+    </div>
+            <div id="auth-error" class="error-message hidden"></div>
+            <div id="login-notice" class="login-notice hidden"></div>
+            <!-- Lock Screen Messages -->
+            <div id="lock-messages" class="lock-messages hidden"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-screen" class="screen">
+        <nav class="sidebar">
+            <div class="user-card" id="user-card" onclick="showProfileModal()" title="לחץ לפרופיל שלך" style="cursor:pointer">
+                <div class="user-avatar">👤</div>
+                <div class="user-info">
+                    <div class="user-name-row">
+                        <span class="user-level-badge" id="user-level-badge" title="">🌱</span>
+                        <span class="user-name" id="display-name">משתמש</span>
+                    </div>
+                    <span class="user-coins">💰 <span id="user-coins">0</span></span>
+                </div>
+            </div>
+            
+            <div class="xp-bar-container" id="xp-bar-container">
+                <div class="xp-bar-header">
+                    <span class="xp-level-label" id="xp-level-label">דרגה 1 — מתחיל</span>
+                    <span class="xp-value" id="xp-value">0 XP</span>
+                </div>
+                <div class="xp-bar-track">
+                    <div class="xp-bar-fill" id="xp-bar-fill" style="width: 0%"></div>
+                </div>
+                <div class="xp-bar-footer">
+                    <span id="xp-next-label">הבא: 100 XP</span>
+                </div>
+            </div>
+
+            <div class="streak-display" id="streak-display">
+                <span class="streak-fire" id="streak-fire">🔥</span>
+                <span class="streak-count" id="streak-count">0</span>
+                <span class="streak-label">ימים ברצף</span>
+            </div>
+            
+            <div class="timer-display" id="timer-display">
+                <div class="timer-icon">⏱️</div>
+                <div class="timer-time" id="timer-time">35:00</div>
+                <div class="timer-label">זמן נותר היום</div>
+                <button class="btn btn-small btn-buy-time" id="buy-time-sidebar-btn" title="קנה עוד זמן" data-tooltip="קנה זמן מחשב">
+                    💰 קנה זמן
+                </button>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item active" data-section="dashboard">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">דף הבית</span>
+                </li>
+                <li class="nav-item" data-section="tasks">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">משימות</span>
+                    <span class="nav-badge hidden" id="tasks-badge">0</span>
+                </li>
+                <li class="nav-item" data-section="questions">
+                    <span class="nav-icon">📖</span>
+                    <span class="nav-text">שאלות הלכתיות</span>
+                </li>
+                <li class="nav-item" data-section="shop">
+                    <span class="nav-icon">🛒</span>
+                    <span class="nav-text">חנות</span>
+                </li>
+                <li class="nav-item" data-section="games">
+                    <span class="nav-icon">🎮</span>
+                    <span class="nav-text">המשחקים שלי</span>
+                </li>
+                <li class="nav-item" data-section="leaderboard">
+                    <span class="nav-icon">🏆</span>
+                    <span class="nav-text">לוח מובילים</span>
+                </li>
+                <li class="nav-item" data-section="stats">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">סטטיסטיקות</span>
+                </li>
+                <li class="nav-item" data-section="customize" id="customize-nav">
+                    <span class="nav-icon">🎨</span>
+                    <span class="nav-text">התאמה אישית</span>
+                </li>
+                <li class="nav-item" data-section="help" id="help-nav">
+                    <span class="nav-icon">❓</span>
+                    <span class="nav-text">עזרה</span>
+                </li>
+                <li class="nav-item" data-section="search" id="search-nav">
+                    <span class="nav-icon">🔍</span>
+                    <span class="nav-text">חיפוש</span>
+                </li>
+                <li class="nav-item admin-only hidden" data-section="admin" id="admin-nav">
+                    <span class="nav-icon">👨‍👧‍👦</span>
+                    <span class="nav-text">לוח הורה</span>
+                </li>
+            </ul>
+            
+            <div id="live-clock" class="live-clock">
+                <span id="clock-time">00:00:00</span>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-footer-actions">
+                    <button class="notif-bell-btn" id="notif-btn" onclick="toggleNotifDropdown()" data-tooltip="התראות">
+                        🔔
+                        <span class="notif-badge hidden" id="notif-badge">0</span>
+                    </button>
+                    <button class="notif-bell-btn volume-btn" id="volume-btn" onclick="toggleVolumePopup()" data-tooltip="עוצמת קול">
+                        <span id="volume-icon">🔊</span>
+                    </button>
+                    <button class="btn btn-outline btn-small" id="logout-btn" data-tooltip="צא מהחשבון">
+                        <span>🚪</span> יציאה
+                    </button>
+                </div>
+                <div class="app-version">v1.0.0 · נבנה עם ❤️</div>
+            </div>
+
+            <!-- Volume Popup -->
+            <div id="volume-popup" class="volume-popup hidden">
+                <div class="volume-popup-title">🔊 עוצמת קול</div>
+                <div class="volume-slider-wrap">
+                    <span class="volume-end-icon">🔇</span>
+                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="80" oninput="onVolumeSliderInput(this.value)">
+                    <span class="volume-end-icon">🔊</span>
+                </div>
+                <div class="volume-pct" id="volume-pct">80%</div>
+                <button class="volume-mute-btn" id="volume-mute-btn" onclick="toggleVolumeMute()">🔇 השתק</button>
+            </div>
+
+            <!-- Notification Dropdown -->
+            <div id="notif-dropdown" class="notif-dropdown hidden">
+                <div class="notif-header">
+                    <span>🔔 התראות</span>
+                    <button class="notif-clear-btn" onclick="clearAllNotifications()">נקה הכל</button>
+                </div>
+                <div id="notif-list" class="notif-list">
+                    <p class="notif-empty">אין התראות חדשות</p>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <!-- Parent Messages Banner -->
+            <div id="msg-banner-container"></div>
+
+            <!-- Restricted Mode Banner -->
+            <div id="restricted-banner" class="restricted-banner hidden">
+                <span class="restricted-icon">⚠️</span>
+                <span>נגמר הזמן שלך להיום! ענה שאלות הלכתיות או השלם משימות כדי להרוויח מטבעות — ואז קנה עוד זמן בחנות.</span>
+            </div>
+
+            <!-- Dashboard -->
+            <section id="dashboard-section" class="content-section active">
+                <div class="section-header">
+                    <h2>שלום, <span id="welcome-name">משתמש</span>! 👋</h2>
+                    <p>הרוויח מטבעות, קנה זמן ושחק!</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card coins-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="stat-coins">0</div>
+                        <div class="stat-label">מטבעות</div>
+                    </div>
+                    <div class="stat-card time-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-value" id="stat-time">0:00</div>
+                        <div class="stat-label">זמן נותר</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="stat-correct">0</div>
+                        <div class="stat-label">תשובות נכונות</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎮</div>
+                        <div class="stat-value" id="stat-games">0</div>
+                        <div class="stat-label">משחקים</div>
+                    </div>
+                    <div class="stat-card level-stat-card" id="dashboard-level-card" onclick="showAchievementsModal()">
+                        <div class="stat-icon" id="stat-level-badge">🌱</div>
+                        <div class="stat-value" id="stat-level">1</div>
+                        <div class="stat-label" id="stat-level-title">מתחיל</div>
+                    </div>
+                    <div class="stat-card streak-stat-card" onclick="navigateTo('leaderboard')">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-value" id="stat-streak">0</div>
+                        <div class="stat-label">ימים ברצף</div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Charts (child users only) -->
+                <div class="dashboard-charts-row" id="dashboard-charts-row">
+                    <div class="dash-chart-card">
+                        <div class="dash-chart-title">📅 פעילות שבועית</div>
+                        <div class="dash-chart-wrap">
+                            <canvas id="dash-weekly-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="dash-chart-card">
+                        <div class="dash-chart-title">📋 סטטוס משימות</div>
+                        <div class="dash-chart-wrap dash-chart-donut">
+                            <canvas id="dash-tasks-chart"></canvas>
+                            <div class="dash-donut-center" id="dash-tasks-center"></div>
+                        </div>
+                        <div class="dash-chart-legend" id="dash-tasks-legend"></div>
+                    </div>
+                    <div class="dash-chart-card">
+                        <div class="dash-chart-title">🎯 דיוק תשובות</div>
+                        <div class="dash-chart-wrap dash-chart-donut">
+                            <canvas id="dash-accuracy-chart"></canvas>
+                            <div class="dash-donut-center" id="dash-accuracy-center"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buy Time Card -->
+                <div class="buy-time-card" id="buy-time-card">
+                    <div class="buy-time-header">
+                        <h3>⏱️ קנה זמן מחשב</h3>
+                        <span class="buy-time-price">💰 <span id="coins-per-minute">5</span> מטבעות לדקה</span>
+                    </div>
+                    <div class="buy-time-options">
+                        <button class="time-option" data-minutes="5">5 דקות<br><small>25 💰</small></button>
+                        <button class="time-option" data-minutes="15">15 דקות<br><small>75 💰</small></button>
+                        <button class="time-option" data-minutes="30">30 דקות<br><small>150 💰</small></button>
+                        <button class="time-option" data-minutes="60">שעה<br><small>300 💰</small></button>
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <h3>מה תרצה לעשות?</h3>
+                    <div class="actions-grid">
+                        <button class="action-card" data-action="tasks">
+                            <span class="action-icon">📋</span>
+                            <span class="action-text">השלם משימות</span>
+                            <span class="action-reward">הרוויח מטבעות</span>
+                        </button>
+                        <button class="action-card" data-action="questions">
+                            <span class="action-icon">📖</span>
+                            <span class="action-text">ענה על שאלות</span>
+                            <span class="action-reward">+10 💰</span>
+                        </button>
+                        <button class="action-card" data-action="shop">
+                            <span class="action-icon">🛒</span>
+                            <span class="action-text">חנות</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tasks Section -->
+            <section id="tasks-section" class="content-section">
+                <div class="section-header">
+                    <h2>📋 משימות</h2>
+                    <p>השלם משימות שההורה שלך הגדיר והרוויח מטבעות!</p>
+                </div>
+                
+                <div class="tasks-filters">
+                    <button class="filter-btn active" data-filter="pending">⏳ ממתינות</button>
+                    <button class="filter-btn" data-filter="awaiting_approval">🔍 ממתינות לאישור</button>
+                    <button class="filter-btn" data-filter="completed">✅ הושלמו</button>
+                    <button class="filter-btn" data-filter="rejected">❌ נדחו</button>
+                </div>
+
+                <div class="tasks-grid" id="tasks-grid">
+                    <div class="empty-state" id="no-tasks">
+                        <span class="empty-icon">📋</span>
+                        <p>אין משימות כרגע</p>
+                        <p class="text-secondary">ההורה שלך יוסיף משימות בקרוב!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Questions Section -->
+            <section id="questions-section" class="content-section">
+                <div class="section-header questions-section-header">
+                    <h2>📖 שאלות הלכתיות</h2>
+                    <div class="questions-header-controls">
+                        <div class="mode-toggle">
+                            <button class="mode-btn active" data-mode="normal">רגיל (+10 💰)</button>
+                            <button class="mode-btn" data-mode="review">חזרות (+15 💰)</button>
+                        </div>
+                        <button class="btn btn-outline btn-small zen-toggle-btn" onclick="toggleZenMode()" title="מצב מיקוד — הסתר את שאר ה-UI">🧘 ZEN</button>
+                    </div>
+                </div>
+
+                <div class="question-arena">
+                    <div class="question-arena-inner">
+                        <div class="question-progress-bar">
+                            <div class="question-progress-info">
+                                <span class="question-num-label">שאלה <span id="current-question-num">1</span></span>
+                                <span id="question-review-badge" class="review-badge hidden">⚠️ כבר נחקר היום — ללא מטבעות</span>
+                            </div>
+                            <div class="question-progress-track">
+                                <div class="question-progress-fill" id="question-progress-fill"></div>
+                            </div>
+                        </div>
+
+                        <div class="question-card" id="question-card">
+                            <p class="question-text" id="question-text">טוען שאלה...</p>
+                            <div class="answers-grid" id="answers-grid"></div>
+                        </div>
+
+                        <div class="question-explanation hidden" id="question-explanation">
+                            <div class="explanation-content" id="explanation-content"></div>
+                            <p class="explanation-hint">לחץ <kbd>רווח</kbd> לשאלה הבאה</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="zen-exit-btn hidden" id="zen-exit-btn" onclick="toggleZenMode()">✕ יציאה ממצב ZEN</button>
+            </section>
+
+            <!-- Shop Section -->
+            <section id="shop-section" class="content-section">
+                <div class="section-header">
+                    <h2>🛒 חנות</h2>
+                    <div class="shop-header-right">
+                        <div class="shop-balance">היתרה: <span id="shop-balance">0</span> 💰</div>
+                        <button class="btn btn-outline btn-small" onclick="openGiftModal()">🎁 שלח מתנה</button>
+                    </div>
+                </div>
+                
+                <div class="shop-tabs">
+                    <button class="shop-tab active" data-tab="customGames">🎮 משחקים</button>
+                    <button class="shop-tab" data-tab="time">⏱️ זמן</button>
+                    <button class="shop-tab" data-tab="avatars">🎭 אווטארים</button>
+                    <button class="shop-tab" data-tab="themes">🎨 ערכות נושא</button>
+                    <button class="shop-tab" data-tab="history">📜 היסטוריה</button>
+                </div>
+                
+                <div class="shop-categories" id="shop-categories"></div>
+                <div class="shop-grid" id="shop-grid"></div>
+            </section>
+
+            <!-- My Games Section -->
+            <section id="games-section" class="content-section">
+                <div class="section-header">
+                    <h2>🎮 המשחקים שלי</h2>
+                    <p>המשחקים שרכשת ומוכנים לשחק</p>
+                </div>
+                <!-- Category filters -->
+                <div class="games-filter-bar" id="games-filter-bar">
+                    <button class="game-filter-btn active" data-cat="all">כל הקטגוריות</button>
+                    <button class="game-filter-btn" data-cat="educational">📚 חינוכי</button>
+                    <button class="game-filter-btn" data-cat="adventure">⚔️ הרפתקאות</button>
+                    <button class="game-filter-btn" data-cat="sports">⚽ ספורט</button>
+                    <button class="game-filter-btn" data-cat="puzzles">🧩 פאזלים</button>
+                    <button class="game-filter-btn" data-cat="other">🎲 אחר</button>
+                </div>
+                <div class="games-grid" id="my-games-grid"></div>
+                <div id="no-games" class="empty-state hidden">
+                    <span class="empty-icon">🎮</span>
+                    <p>אין לך משחקים עדיין</p>
+                    <p class="text-secondary">קנה משחקים בחנות כדי להתחיל לשחק!</p>
+                    <button class="btn btn-primary" style="margin-top:12px" onclick="navigateTo('shop')">🛒 לחנות</button>
+                </div>
+            </section>
+
+            <!-- Leaderboard Section -->
+            <section id="leaderboard-section" class="content-section">
+                <div class="section-header">
+                    <h2>🏆 לוח מובילים</h2>
+                    <p>מי מוביל השבוע?</p>
+                </div>
+                <div class="leaderboard-tabs">
+                    <button class="lb-tab active" data-lb="xp">⭐ XP ודרגה</button>
+                    <button class="lb-tab" data-lb="weekly">📅 שבועי</button>
+                    <button class="lb-tab" data-lb="streak">🔥 רצף יומי</button>
+                    <button class="lb-tab" data-lb="achievements">🏅 הישגים</button>
+                </div>
+                <div class="leaderboard-container" id="leaderboard-container"></div>
+            </section>
+
+            <!-- Customization Section -->
+            <section id="customize-section" class="content-section">
+                <div class="section-header">
+                    <h2>🎨 התאמה אישית</h2>
+                    <div class="shop-balance">היתרה שלך: <span id="customize-balance">0</span> 💰</div>
+                </div>
+                
+                <div class="customize-tabs">
+                    <button class="customize-tab active" data-cust-tab="avatars">🎭 אווטארים</button>
+                    <button class="customize-tab" data-cust-tab="themes">🎨 ערכות נושא</button>
+                    <button class="customize-tab" data-cust-tab="preferences">⚙️ העדפות</button>
+                </div>
+
+                <!-- Avatars Tab -->
+                <div class="customize-tab-content active" id="cust-avatars">
+                    <div class="avatar-rarity-filters">
+                        <button class="rarity-filter-btn active" data-rarity="all">🌟 הכל</button>
+                        <button class="rarity-filter-btn" data-rarity="common">⚪ חינם</button>
+                        <button class="rarity-filter-btn" data-rarity="rare">🔵 נדיר</button>
+                        <button class="rarity-filter-btn" data-rarity="epic">🟣 אפי</button>
+                        <button class="rarity-filter-btn" data-rarity="legendary">🟡 אגדי</button>
+                    </div>
+                    <div class="avatars-grid" id="avatars-grid"></div>
+                </div>
+
+                <!-- Themes Tab -->
+                <div class="customize-tab-content" id="cust-themes">
+                    <div class="themes-grid" id="themes-grid"></div>
+                </div>
+
+                <!-- Preferences Tab -->
+                <div class="customize-tab-content" id="cust-preferences">
+
+                    <!-- Premium Sticker Prefs (visible only when a premium theme is active) -->
+                    <div id="premium-theme-prefs" class="pref-section premium-prefs-panel hidden">
+                        <div class="premium-prefs-title">✨ מדבקות — הגדרות ערכת נושא פרימיום</div>
+
+                        <div class="setting-group setting-group-toggle">
+                            <div class="setting-toggle-info">
+                                <label>🎨 הצג מדבקות</label>
+                                <small>הצג או הסתר את כל המדבקות של הערכה</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pref-stickers-visible" checked onchange="onStickerVisibleChange(this.checked)">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-group sticker-opacity-group">
+                            <div class="setting-toggle-info">
+                                <label>💡 עוצמת מדבקות</label>
+                                <small>שנה את הבהירות של כל המדבקות</small>
+                            </div>
+                            <div class="sticker-brightness-row">
+                                <span>🌑</span>
+                                <input type="range" id="pref-sticker-opacity" class="sticker-opacity-slider" min="20" max="100" value="100" oninput="onStickerOpacityInput(this.value)">
+                                <span>☀️</span>
+                                <span class="sticker-br-pct" id="pref-sticker-opacity-val">100%</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-group setting-group-toggle">
+                            <div class="setting-toggle-info">
+                                <label>🖱️ ערוך מיקומים</label>
+                                <small>גרור כל מדבקה לכל מקום — המיקום נשמר אוטומטית</small>
+                            </div>
+                            <button class="btn btn-small btn-premium-edit" id="pref-sticker-drag-btn" onclick="toggleStickerDragMode()">✏️ ערוך</button>
+                        </div>
+
+                        <button class="btn btn-small btn-outline sticker-reset-btn" onclick="resetStickerPositions()">↩️ אפס מיקומים</button>
+                    </div>
+
+                    <div class="pref-section">
+                        <div class="setting-group setting-group-toggle">
+                            <div class="setting-toggle-info">
+                                <label>✨ אנימציות</label>
+                                <small>הפעל או כבה אנימציות ממשק — כיבוי ישפר ביצועים במחשבים חלשים</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pref-animations" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-group setting-group-toggle">
+                            <div class="setting-toggle-info">
+                                <label>🔊 אפקטי צליל</label>
+                                <small>הפעל או כבה צלילים במהלך המשחק</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pref-sound" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search Section -->
+            <section id="search-section" class="content-section">
+                <div class="section-header">
+                    <h2>🔍 חיפוש מהיר</h2>
+                    <p>חפש כל פיצ׳ר ועבור אליו ישירות בלחיצה אחת</p>
+                </div>
+
+                <div class="search-page-wrap">
+                    <!-- Search box -->
+                    <div class="search-box-wrap">
+                        <span class="search-box-icon">🔍</span>
+                        <input
+                            type="text"
+                            id="global-search-input"
+                            class="search-box-input"
+                            placeholder="חפש פיצ׳ר, פעולה, או קטגוריה..."
+                            oninput="onSearchInput(this.value)"
+                            onkeydown="if(event.key==='Escape')clearSearch()"
+                            autocomplete="off"
+                            dir="rtl"
+                        >
+                        <button class="search-box-clear" id="search-clear-btn" onclick="clearSearch()" title="נקה">✕</button>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="search-results-container" class="search-results-container"></div>
+                </div>
+            </section>
+
+            <!-- Help Section -->
+            <section id="help-section" class="content-section">
+                <div class="section-header">
+                    <h2>❓ עזרה — מדריך לשימוש</h2>
+                    <p>הכל על האפליקציה — לסטודנט שמעולם לא השתמש בה</p>
+                </div>
+
+                <div class="help-container">
+
+                    <!-- Welcome card -->
+                    <div class="help-card help-welcome">
+                        <div class="help-card-icon">🎮</div>
+                        <h3>ברוכים הבאים לKidScreen!</h3>
+                        <p>האפליקציה הזו היא מערכת שמאפשרת לך להרוויח <strong>מטבעות</strong> על ידי לימוד, ועם המטבעות לקנות <strong>זמן מחשב</strong>, <strong>פריטים לעולם שלך</strong>, <strong>אווטארים</strong> ו<strong>ערכות נושא</strong> מגניבות.</p>
+                    </div>
+
+                    <!-- Accordion sections -->
+                    <div class="help-accordion">
+
+                        <div class="help-topic">
+                            <button class="help-topic-btn" onclick="toggleHelp(this)">
+                                <span>💰 איך מרוויחים מטבעות?</span>
+                                <span class="help-chevron">▼</span>
+                            </button>
+                            <div class="help-topic-body">
+                                <div class="help-item">
+                                    <span class="help-item-icon">📖</span>
+                                    <div>
+                                        <strong>ענה על שאלות</strong>
+                                        <p>בקטגוריה <em>שאלות הלכתיות</em> יש שאלות עם 4 תשובות. על כל תשובה נכונה מקבלים מטבעות ו-XP. שאלות בעמוד החזרה נותנות מטבעות נוספים (אבל רק פעם אחת ביום לאותה שאלה).</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">✅</span>
+                                    <div>
+                                        <strong>השלם משימות</strong>
+                                        <p>ההורה יוצר משימות (כמו "סדר את החדר"). כשאתה מסמן שסיימת, ההורה מאשר ואז מקבלים מטבעות. המשימה יכולה להיות חד-פעמית, יומית או שבועית.</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">🔥</span>
+                                    <div>
+                                        <strong>רצף יומי (Streak)</strong>
+                                        <p>כשנכנסים ועונים שאלה כל יום בימים רצופים — מקבלים בונוס מטבעות. ככל שהרצף ארוך יותר, כך נצברים הישגים מיוחדים.</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">🎂</span>
+                                    <div>
+                                        <strong>יום הולדת</strong>
+                                        <p>פעם בשנה, ביום ההולדת שלך, מקבלים מטבעות מיוחדים כמתנה.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-topic">
+                            <button class="help-topic-btn" onclick="toggleHelp(this)">
+                                <span>⏱️ איך קונים זמן מחשב?</span>
+                                <span class="help-chevron">▼</span>
+                            </button>
+                            <div class="help-topic-body">
+                                <div class="help-item">
+                                    <span class="help-item-icon">🕐</span>
+                                    <div>
+                                        <strong>זמן חינם יומי</strong>
+                                        <p>כל יום, כשמתחברים לאפליקציה, מקבלים כמות זמן חינם (ברירת המחדל: 30 דקות). הזמן נחשב רק כשמשחקים — לא כשפתוחים בשאלות או בחנות.</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">🛒</span>
+                                    <div>
+                                        <strong>קניית זמן נוסף</strong>
+                                        <p>כשנגמר הזמן החינם, מופיע מסך נעילה. לוחצים על <strong>"קנה זמן"</strong>, בוחרים כמה דקות, ומשלמים מהמטבעות שצברת. ברירת המחדל: 20 מטבעות לדקה.</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">💡</span>
+                                    <div>
+                                        <strong>טיפ</strong>
+                                        <p>אם תלמד 15 דקות (ותענה נכון על ~100 שאלות) תרוויח מספיק מטבעות לעוד 10 דקות מחשב. ככל שתלמד יותר — כך תשחק יותר!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-topic">
+                            <button class="help-topic-btn" onclick="toggleHelp(this)">
+                                <span>⭐ איך עולים ברמות?</span>
+                                <span class="help-chevron">▼</span>
+                            </button>
+                            <div class="help-topic-body">
+                                <div class="help-item">
+                                    <span class="help-item-icon">📈</span>
+                                    <div>
+                                        <strong>XP — נקודות ניסיון</strong>
+                                        <p>על כל שאלה נכונה מקבלים גם XP (נקודות ניסיון) בנוסף למטבעות. XP ומטבעות הם שני דברים שונים: XP מעלה דרגה, מטבעות לקנייה.</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">🎯</span>
+                                    <div>
+                                        <strong>טבלת הדרגות</strong>
+                                        <div class="help-levels-table">
+                                            <div class="hlt-row"><span>🌱</span><span>דרגה 1 — מתחיל</span><span>0 XP</span></div>
+                                            <div class="hlt-row"><span>📗</span><span>דרגה 2 — לומד</span><span>600 XP</span></div>
+                                            <div class="hlt-row"><span>⭐</span><span>דרגה 3 — חרוץ</span><span>1,600 XP</span></div>
+                                            <div class="hlt-row"><span>🌟</span><span>דרגה 4 — מצטיין</span><span>3,200 XP</span></div>
+                                            <div class="hlt-row"><span>🧠</span><span>דרגה 5 — חכם</span><span>5,500 XP</span></div>
+                                            <div class="hlt-row"><span>💎</span><span>דרגה 6 — מומחה</span><span>9,000 XP</span></div>
+                                            <div class="hlt-row"><span>🏆</span><span>דרגה 7 — אלוף</span><span>13,500 XP</span></div>
+                                            <div class="hlt-row"><span>👑</span><span>דרגה 8 — אגדה</span><span>20,000 XP</span></div>
+                                            <div class="hlt-row"><span>🔱</span><span>דרגה 9 — שליט</span><span>28,000 XP</span></div>
+                                            <div class="hlt-row hlt-gold"><span>🌍</span><span>דרגה 10 — אלוף העולם</span><span>38,000 XP</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-topic">
+                            <button class="help-topic-btn" onclick="toggleHelp(this)">
+                                <span>🛒 מה אפשר לקנות בחנות?</span>
+                                <span class="help-chevron">▼</span>
+                            </button>
+                            <div class="help-topic-body">
+                                <div class="help-item">
+                                    <span class="help-item-icon">🏡</span>
+                                    <div>
+                                        <strong>פריטי עולם</strong>
+                                        <p>בניינים, עצים, גדרות, קישוטים ועוד — כל פריט שקונים נוסף לעולם הפרטי שלך (כמו מינקראפט). פריטים בסיסיים עולים 50–150 מטבעות, פריטים אפיים — 1,000+.</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">🎮</span>
+                                    <div>
+                                        <strong>משחקים</strong>
+                                        <p>משחקים שניתן לשחק בהם מופיעים בקטגוריית המשחקים בחנות. לאחר קנייה, המשחק מופיע בדף <em>המשחקים שלי</em>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-topic">
+                            <button class="help-topic-btn" onclick="toggleHelp(this)">
+                                <span>🎨 התאמה אישית — אווטארים וערכות נושא</span>
+                                <span class="help-chevron">▼</span>
+                            </button>
+                            <div class="help-topic-body">
+                                <div class="help-item">
+                                    <span class="help-item-icon">🐺</span>
+                                    <div>
+                                        <strong>אווטארים</strong>
+                                        <p>בחר דמות שתייצג אותך בלוח המובילים ובפרופיל שלך. יש ארבע רמות נדירות:</p>
+                                        <ul class="help-list">
+                                            <li><span style="color:#b2bec3">⬤ חינם (Common)</span> — 6 דמויות בסיסיות, ללא עלות</li>
+                                            <li><span style="color:#74b9ff">⬤ נדיר (Rare)</span> — 600–900 מטבעות</li>
+                                            <li><span style="color:#a29bfe">⬤ אפי (Epic)</span> — 1,500–3,000 מטבעות</li>
+                                            <li><span style="color:#ffd700">⬤ אגדי (Legendary)</span> — 4,000–8,000 מטבעות</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">🌙</span>
+                                    <div>
+                                        <strong>ערכות נושא (Themes)</strong>
+                                        <p>משנות את כל הצבעים והמראה של האפליקציה. יש 7 ערכות חינמיות (חושך, בהיר, אוקיינוס, יער, שקיעה, גלקסיה, חצות) ו-3 פרמיום מיוחדות עם מדבקות:</p>
+                                        <ul class="help-list">
+                                            <li>🚀 <strong>חלל</strong> — 2,500 מטבעות</li>
+                                            <li>🎀 <strong>ורוד</strong> — 2,500 מטבעות</li>
+                                            <li>🔥 <strong>אש</strong> — 2,500 מטבעות</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-topic">
+                            <button class="help-topic-btn" onclick="toggleHelp(this)">
+                                <span>🏅 הישגים ואתגרים</span>
+                                <span class="help-chevron">▼</span>
+                            </button>
+                            <div class="help-topic-body">
+                                <div class="help-item">
+                                    <span class="help-item-icon">🏅</span>
+                                    <div>
+                                        <strong>הישגים אוטומטיים</strong>
+                                        <p>האפליקציה עוקבת אחרי ההתקדמות שלך ונותנת הישגים כשמגיעים לאבני דרך: 10 שאלות נכונות, 5 משימות, 7 ימי רצף ועוד. כשמקבלים הישג — מופיעה הודעה ונשמר בפרופיל.</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">🎯</span>
+                                    <div>
+                                        <strong>אתגרים מהורה</strong>
+                                        <p>ההורה יכול ליצור אתגרים מיוחדים כמו "ענה נכון על 20 שאלות השבוע" עם פרס מטבעות. כשמסיימים אתגר — לוחצים "תבע פרס" וזוכים במטבעות.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-topic">
+                            <button class="help-topic-btn" onclick="toggleHelp(this)">
+                                <span>📊 סטטיסטיקות ולוח מובילים</span>
+                                <span class="help-chevron">▼</span>
+                            </button>
+                            <div class="help-topic-body">
+                                <div class="help-item">
+                                    <span class="help-item-icon">📊</span>
+                                    <div>
+                                        <strong>הסטטיסטיקות שלי</strong>
+                                        <p>בדף הסטטיסטיקות ניתן לראות גרפים של ההתקדמות השבועית: כמה שאלות ענית, כמה מטבעות הרווחת, ורצף הימים שלך.</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">🏆</span>
+                                    <div>
+                                        <strong>לוח מובילים</strong>
+                                        <p>בדף לוח המובילים רואים את כל המשתמשים בדירוג לפי XP, מטבעות, שאלות נכונות ועוד. מי שעל עמדה 1 זוכה בכתר מיוחד!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-topic">
+                            <button class="help-topic-btn" onclick="toggleHelp(this)">
+                                <span>💬 הודעות ומשימות</span>
+                                <span class="help-chevron">▼</span>
+                            </button>
+                            <div class="help-topic-body">
+                                <div class="help-item">
+                                    <span class="help-item-icon">📋</span>
+                                    <div>
+                                        <strong>משימות</strong>
+                                        <p>ההורה מוסיף משימות. כשסיימת — לחץ על הכפתור "סיימתי". ההורה יאשר ותקבל את הפרס. אם משימה חוזרת, היא תופיע שוב אוטומטית בכל יום/שבוע.</p>
+                                    </div>
+                                </div>
+                                <div class="help-item">
+                                    <span class="help-item-icon">💬</span>
+                                    <div>
+                                        <strong>הודעות מהורה</strong>
+                                        <p>ההורה יכול לשלוח הודעות אישיות שיופיעו בדף הבית שלך. ניתן לראותן גם בדף המשימות.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-topic">
+                            <button class="help-topic-btn" onclick="toggleHelp(this)">
+                                <span>❓ שאלות נפוצות</span>
+                                <span class="help-chevron">▼</span>
+                            </button>
+                            <div class="help-topic-body">
+                                <div class="help-faq">
+                                    <div class="faq-item"><strong>למה המשחקים נסגרים לי?</strong><p>כשאין לך זמן מחשב, המשחקים ייסגרו אוטומטית. קנה זמן נוסף מהחנות.</p></div>
+                                    <div class="faq-item"><strong>איפה רואים כמה מטבעות יש לי?</strong><p>בפינה הימנית העליונה תמיד מוצג מספר המטבעות שלך (💰).</p></div>
+                                    <div class="faq-item"><strong>האם מטבעות מתאפסים?</strong><p>לא. המטבעות שצברת לא נעלמים — אלא אם כן הוצאת אותם לקנייה.</p></div>
+                                    <div class="faq-item"><strong>האם ה-XP מתאפס?</strong><p>לא. ה-XP (ניסיון) אף פעם לא מתאפס ורק עולה. הדרגה שלך תמיד שמורה.</p></div>
+                                    <div class="faq-item"><strong>מה זה "רצף"?</strong><p>רצף (Streak) הוא מספר הימים הרצופים שנכנסת ופעלת. אם תחמיץ יום — הרצף חוזר לאפס, אז כדאי להיכנס כל יום!</p></div>
+                                    <div class="faq-item"><strong>מה קורה ביום הולדת?</strong><p>אם ההורה הזין את תאריך הלידה שלך, תקבל בונוס מטבעות ביום ההולדת.</p></div>
+                                    <div class="faq-item"><strong>האם ניתן לשחק בלי אינטרנט?</strong><p>כן! האפליקציה עובדת מקומית. האינטרנט נדרש רק לסנכרון בין מכשירים אם ההורה הפעיל אותו.</p></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- end help-accordion -->
+                </div><!-- end help-container -->
+            </section>
+
+            <!-- Admin / Parent Section -->
+            <section id="admin-section" class="content-section">
+                <div class="section-header">
+                    <h2>👨‍👧‍👦 לוח הורה</h2>
+                    <p>ניהול ילדים, משימות, משחקים והגדרות</p>
+                </div>
+                
+                <!-- Parent Tabs -->
+                <div class="admin-tabs">
+                    <button class="admin-tab active" data-admin-tab="overview">📊 סקירה</button>
+                    <button class="admin-tab" data-admin-tab="tasks-manage">📋 משימות</button>
+                    <button class="admin-tab" data-admin-tab="questions-manage">❓ שאלות</button>
+                    <button class="admin-tab" data-admin-tab="messages-manage">📢 הודעות</button>
+                    <button class="admin-tab" data-admin-tab="games-manage">🎮 משחקים</button>
+                    <button class="admin-tab" data-admin-tab="rewards-manage">🎯 פרסים</button>
+                    <button class="admin-tab" data-admin-tab="settings-manage">⚙️ הגדרות</button>
+                    <button class="admin-tab" data-admin-tab="sync-manage">🔄 סנכרון</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div class="admin-tab-content active" id="admin-overview">
+                    <div class="admin-stats-row">
+                        <div class="admin-stat-card">
+                            <span class="admin-stat-value" id="admin-total-users">0</span>
+                            <span class="admin-stat-label">ילדים</span>
+                        </div>
+                        <div class="admin-stat-card">
+                            <span class="admin-stat-value" id="admin-total-questions">0</span>
+                            <span class="admin-stat-label">שאלות נענו</span>
+                        </div>
+                        <div class="admin-stat-card">
+                            <span class="admin-stat-value" id="admin-total-tasks">0</span>
+                            <span class="admin-stat-label">משימות הושלמו</span>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-table-container">
+                        <div class="admin-section-header">
+                            <h3>📊 מצב הילדים</h3>
+                            <button class="btn btn-primary" onclick="openAddChildModal()">➕ הוסף ילד</button>
+                        </div>
+                        <table class="admin-table" id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>ילד</th>
+                                    <th>מטבעות</th>
+                                    <th>זמן נותר</th>
+                                    <th>שאלות</th>
+                                    <th>משימות</th>
+                                    <th>משחקים</th>
+                                    <th>דרגה / XP</th>
+                                    <th>פעולות</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body"></tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pending Task Approvals -->
+                    <div class="pending-approvals" id="pending-approvals">
+                        <h3>🔔 ממתינים לאישור</h3>
+                        <div class="approvals-list" id="approvals-list"></div>
+                    </div>
+                </div>
+
+                <!-- Tasks Management Tab -->
+                <div class="admin-tab-content" id="admin-tasks-manage">
+                    <div class="admin-section-header">
+                        <h3>📋 ניהול משימות</h3>
+                        <button class="btn btn-primary" id="create-task-btn">➕ צור משימה חדשה</button>
+                    </div>
+                    <div class="admin-tasks-list" id="admin-tasks-list"></div>
+                </div>
+
+                <!-- Questions Management Tab -->
+                <div class="admin-tab-content" id="admin-questions-manage">
+                    <div class="admin-section-header">
+                        <h3>❓ שאלות מותאמות אישית</h3>
+                        <button class="btn btn-primary" id="create-question-btn">➕ שאלה חדשה</button>
+                    </div>
+                    <p class="admin-hint">שאלות אלו יופיעו לילדים בנוסף לשאלות המובנות.</p>
+                    <div class="admin-tasks-list" id="admin-questions-list"></div>
+                </div>
+
+                <!-- Messages & Birthday Management Tab -->
+                <div class="admin-tab-content" id="admin-messages-manage">
+                    <div class="admin-section-header">
+                        <h3>📢 הודעות הורה</h3>
+                        <button class="btn btn-primary" onclick="openMessageComposer()">➕ הודעה חדשה</button>
+                    </div>
+                    <p class="admin-hint">שלח הודעות לכל הילדים או לילד מסוים. הודעות למסך הנעילה מופיעות לפני ההתחברות.</p>
+
+                    <!-- Message Composer -->
+                    <div id="message-composer" class="message-composer hidden">
+                        <div class="form-group">
+                            <label>📝 טקסט ההודעה</label>
+                            <textarea id="msg-text" rows="3" placeholder="שלום לכולם! היום..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>👤 למי?</label>
+                            <select id="msg-target">
+                                <option value="all">כל הילדים</option>
+                            </select>
+                        </div>
+                        <div class="form-group setting-row" style="align-items:center;gap:10px">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="msg-show-lock">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>🔒 הצג במסך הנעילה</span>
+                        </div>
+                        <div class="form-group">
+                            <label>⏰ תפוגה אוטומטית (שעות, 0 = ללא הגבלה)</label>
+                            <input type="number" id="msg-expiry" min="0" value="24" style="width:120px">
+                        </div>
+                        <div style="display:flex;gap:10px;margin-top:12px">
+                            <button class="btn btn-outline" onclick="closeMessageComposer()">ביטול</button>
+                            <button class="btn btn-primary" onclick="sendAdminMessage()">📤 שלח</button>
+                        </div>
+                    </div>
+
+                    <!-- Active Messages -->
+                    <div id="admin-messages-list" class="admin-tasks-list" style="margin-top:16px"></div>
+
+                    <!-- Birthday per user -->
+                    <div class="admin-section-header" style="margin-top:24px">
+                        <h3>🎂 ימי הולדת</h3>
+                    </div>
+                    <p class="admin-hint">קבע יום הולדת לכל ילד — הם יקבלו מטבעות בונוס ביום שלהם! 🎉</p>
+                    <div id="birthday-list" class="admin-tasks-list"></div>
+                </div>
+
+                <!-- Games Management Tab -->
+                <div class="admin-tab-content" id="admin-games-manage">
+                    <div class="admin-section-header">
+                        <h3>🎮 ניהול משחקים</h3>
+                        <button class="btn btn-primary" id="add-game-btn">➕ הוסף משחק</button>
+                    </div>
+
+                    <!-- EXE Help Panel -->
+                    <div class="exe-help-panel">
+                        <button class="exe-help-toggle" onclick="toggleExeHelp()">
+                            <span>💡 איך מוצאים את קובץ המשחק? לחץ למדריך</span>
+                            <span class="exe-help-arrow" id="exe-help-arrow">▼</span>
+                        </button>
+                        <div class="exe-help-body hidden" id="exe-help-body">
+
+                            <div class="exe-help-section exe-why">
+                                <h4>🤔 למה צריך קובץ EXE?</h4>
+                                <p>כל משחק במחשב הוא בעצם תוכנה — ובלב כל תוכנה יש <strong>קובץ הפעלה</strong> (.exe) שמריץ אותה. כשאתה בוחר את הקובץ הזה, המערכת שלנו יודעת <em>בדיוק</em> איפה המשחק נמצא ויכולה להפעיל אותו עבור הילד. לכל משחק — בלי יוצא מן הכלל — יש קובץ EXE כזה; רק צריך לדעת איפה לחפש.</p>
+                            </div>
+
+                            <div class="exe-help-platforms">
+
+                                <div class="exe-platform-card">
+                                    <div class="exe-platform-header steam-color">
+                                        <span class="exe-platform-logo">🔵</span>
+                                        <strong>Steam</strong>
+                                    </div>
+                                    <ol class="exe-steps">
+                                        <li>פתח את <strong>Steam</strong> ועבור ל־<strong>ספרייה</strong> (Library)</li>
+                                        <li>לחץ <strong>קליק ימני</strong> על שם המשחק ← <strong>נהל</strong> (Manage) ← <strong>עיין בקבצים המקומיים</strong> (Browse local files)</li>
+                                        <li>ייפתח חלון סייר עם תיקיית המשחק — חפש קובץ בשם המשחק עם סיומת <code>.exe</code></li>
+                                        <li>לחץ עליו קליק ימני ← <strong>העתק כנתיב</strong> (Copy as path) — או פשוט גרור אותו לשדה הנתיב</li>
+                                    </ol>
+                                    <div class="exe-tip">💡 <strong>טיפ:</strong> נתיב Steam נראה בד"כ כך: <code>C:\Program Files (x86)\Steam\steamapps\common\שם-המשחק\game.exe</code></div>
+                                </div>
+
+                                <div class="exe-platform-card">
+                                    <div class="exe-platform-header epic-color">
+                                        <span class="exe-platform-logo">⚫</span>
+                                        <strong>Epic Games</strong>
+                                    </div>
+                                    <ol class="exe-steps">
+                                        <li>פתח את <strong>Epic Games Launcher</strong> ועבור ל־<strong>ספרייה</strong> (Library)</li>
+                                        <li>לחץ על <strong>שלוש הנקודות (...)</strong> ליד המשחק ← <strong>ניהול</strong> (Manage)</li>
+                                        <li>תחת <strong>Installation</strong> יופיע הנתיב — לחץ על סמל התיקייה כדי לפתוח אותה</li>
+                                        <li>בתוך התיקייה חפש תת-תיקייה <code>Binaries\Win64</code> או <code>Win32</code> — שם בד"כ נמצא ה-EXE הראשי</li>
+                                    </ol>
+                                    <div class="exe-tip">💡 <strong>טיפ:</strong> נתיב Epic נראה בד"כ כך: <code>C:\Program Files\Epic Games\שם-המשחק\Binaries\Win64\game.exe</code></div>
+                                </div>
+
+                            </div>
+
+                            <div class="exe-help-section exe-general">
+                                <h4>🔍 טיפים כלליים — איך מוצאים EXE לכל משחק</h4>
+                                <ul class="exe-tips-list">
+                                    <li><strong>קיצור דרך בשולחן העבודה:</strong> לחץ קליק ימני על האייקון של המשחק בשולחן ← <strong>פתח מיקום קובץ</strong> (Open file location) — זה מוביל ישר ל-EXE</li>
+                                    <li><strong>חיפוש בסייר:</strong> פתח סייר קבצים, נווט ל-<code>C:\Program Files</code> או <code>C:\Program Files (x86)</code> וחפש תיקייה עם שם המשחק</li>
+                                    <li><strong>חיפוש בחיפוש Windows:</strong> לחץ Win+S, כתוב את שם המשחק, לחץ קליק ימני על התוצאה ← <strong>פתח מיקום קובץ</strong></li>
+                                    <li><strong>איזה EXE לבחור?</strong> אם יש כמה קבצי EXE בתיקייה — בחר את זה עם שם המשחק או הגדול ביותר. הימנע מ-<code>launcher.exe / unins.exe / update.exe</code></li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="admin-games-list" id="admin-games-list"></div>
+                </div>
+
+                <!-- Rewards / Custom Achievements Tab -->
+                <div class="admin-tab-content" id="admin-rewards-manage">
+                    <div class="admin-section-header">
+                        <h3>🎯 פרסים ויעדים מותאמים אישית</h3>
+                        <button class="btn btn-primary" id="create-reward-btn" onclick="openCreateRewardModal()">➕ פרס חדש</button>
+                    </div>
+                    <p class="admin-hint">צור יעדים מיוחדים — כשילד יגיע ליעד, הוא יקבל מטבעות 💰 אוטומטית!</p>
+
+                    <!-- Toggle: list / progress -->
+                    <div class="rewards-view-toggle">
+                        <button class="rewards-toggle-btn active" id="rewards-view-list-btn" onclick="showRewardsView('list')">📋 כל הפרסים</button>
+                        <button class="rewards-toggle-btn" id="rewards-view-progress-btn" onclick="showRewardsView('progress')">📊 מי הרוויח</button>
+                    </div>
+
+                    <div id="rewards-view-list">
+                        <div class="custom-achievements-list" id="custom-achievements-list"></div>
+                    </div>
+
+                    <div id="rewards-view-progress" class="hidden">
+                        <div class="custom-achievements-progress" id="custom-achievements-progress"></div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="admin-tab-content" id="admin-settings-manage">
+                    <h3>⚙️ הגדרות מערכת</h3>
+                    <div class="settings-form">
+
+                        <!-- Difficulty Presets -->
+                        <div class="settings-section-title">🎮 רמת קושי — הגדרה מהירה</div>
+                        <div class="setting-group setting-hint">
+                            <small>בחר רמת קושי כדי להגדיר אוטומטית את כל הפרמטרים הכלכליים. ניתן לשנות ידנית לאחר מכן ולשמור.</small>
+                        </div>
+                        <div class="difficulty-presets">
+                            <button class="btn difficulty-btn" id="preset-easy" onclick="applyDifficultyPreset('easy')">
+                                <span class="diff-icon">😊</span>
+                                <span class="diff-name">קל</span>
+                                <span class="diff-desc">4 💰/שאלה · 45 דק' חינם · 10 💰/דקה</span>
+                            </button>
+                            <button class="btn difficulty-btn difficulty-btn-active" id="preset-medium" onclick="applyDifficultyPreset('medium')">
+                                <span class="diff-icon">⚖️</span>
+                                <span class="diff-name">בינוני</span>
+                                <span class="diff-desc">2 💰/שאלה · 30 דק' חינם · 20 💰/דקה</span>
+                            </button>
+                            <button class="btn difficulty-btn" id="preset-hard" onclick="applyDifficultyPreset('hard')">
+                                <span class="diff-icon">💪</span>
+                                <span class="diff-name">קשה</span>
+                                <span class="diff-desc">1 💰/שאלה · 20 דק' חינם · 40 💰/דקה</span>
+                            </button>
+                        </div>
+
+                        <!-- Economy details -->
+                        <div class="settings-section-title">💰 הגדרות כלכלה</div>
+                        <div class="setting-group">
+                            <label>⏱️ זמן חינם יומי (דקות)</label>
+                            <input type="number" id="setting-daily-time" min="0" max="480" value="30">
+                            <small>כמה דקות כל ילד מקבל בחינם ביום</small>
+                        </div>
+                        <div class="setting-group">
+                            <label>💰 מחיר דקה (מטבעות)</label>
+                            <input type="number" id="setting-coins-per-min" min="1" max="200" value="20">
+                            <small>כמה מטבעות עולה לקנות דקה נוספת</small>
+                        </div>
+                        <div class="setting-group">
+                            <label>📖 מטבעות לשאלה נכונה</label>
+                            <input type="number" id="setting-coins-per-answer" min="1" max="100" value="2">
+                            <small>שאלת חזרה תיתן +1 מטבע נוסף</small>
+                        </div>
+                        <div class="setting-group">
+                            <label>🔑 קוד PIN הורה</label>
+                            <input type="password" id="setting-parent-pin" maxlength="8" value="">
+                            <small>קוד לאישור משימות ופעולות הורה</small>
+                        </div>
+                        <div class="setting-group setting-group-toggle">
+                            <div class="setting-toggle-info">
+                                <label>🔒 הגנת משחקים (Game Guard)</label>
+                                <small>כשמופעל — אם ילד יפתח משחק ישירות מהמחשב ללא רכישה, המשחק ייסגר אוטומטית</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="setting-game-guard" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Allowed Hours -->
+                        <div class="settings-section-title">🕐 הגבלת שעות פעילות</div>
+                        <div class="setting-group setting-hint">
+                            <small>הגדר חלונות זמן שבהם ילדים מורשים להתחבר. כשרשימה ריקה — אין הגבלה. אפשר להגדיר מספר חלונות (למשל 14:00–16:00 וגם 19:00–21:00).</small>
+                        </div>
+                        <div class="time-windows-editor">
+                            <div id="time-windows-list" class="time-windows-list"></div>
+                            <button type="button" class="btn btn-outline btn-small tw-add-btn" onclick="addTimeWindow()">➕ הוסף חלון זמן</button>
+                        </div>
+
+                        <!-- Streak Settings -->
+                        <div class="settings-section-title">🔥 הגדרות רצף יומי</div>
+                        <div class="setting-group">
+                            <label>שאלות ביום לספירת רצף</label>
+                            <input type="number" id="setting-streak-quota" min="1" max="50" value="1">
+                            <small>הגדרה זו בשימוש עתידי — כרגע כל שאלה נחשבת לרצף</small>
+                        </div>
+                        <div class="setting-group">
+                            <label>🎁 בונוס מטבעות לרצף יומי</label>
+                            <input type="number" id="setting-streak-bonus" min="0" max="200" value="5">
+                            <small>כמה מטבעות נוספים מקבלים על כל יום רצף (החל מיום 2)</small>
+                        </div>
+
+                        <!-- Birthday Bonus -->
+                        <div class="settings-section-title">🎂 בונוס יום הולדת</div>
+                        <div class="setting-group">
+                            <label>💰 מטבעות בונוס לילד ביום הולדתו</label>
+                            <input type="number" id="setting-birthday-bonus" min="0" max="9999" value="100">
+                            <small>כמה מטבעות יקבל הילד ביום הולדתו (0 = בונוס יום הולדת כבוי)</small>
+                        </div>
+
+                        <button class="btn btn-primary" id="save-settings-btn">💾 שמור הגדרות</button>
+                    </div>
+                </div>
+
+                <!-- Sync Tab -->
+                <div class="admin-tab-content" id="admin-sync-manage">
+                    <h3>🔄 סנכרון אונליין</h3>
+                    <p class="admin-hint">חבר מכשירים נוספים כדי שכל הנתונים יסתנכרנו בזמן אמת דרך Firebase.</p>
+
+                    <div id="sync-status-panel" class="sync-panel">
+                        <div class="sync-status-row">
+                            <span class="sync-status-label">מצב:</span>
+                            <span id="sync-status-badge" class="sync-badge sync-off">לא מחובר</span>
+                        </div>
+                        <div class="sync-status-row" id="sync-family-id-row" style="display:none">
+                            <span class="sync-status-label">קוד משפחה:</span>
+                            <code id="sync-family-id-display" class="sync-family-code"></code>
+                            <button class="btn btn-small btn-outline" onclick="copySyncFamilyId()">📋 העתק</button>
+                        </div>
+                    </div>
+
+                    <!-- Not connected state -->
+                    <div id="sync-setup-panel">
+                        <div class="sync-setup-options">
+                            <div class="sync-option-card">
+                                <h4>🏠 מכשיר ראשי (ראשון)</h4>
+                                <p>צור קוד משפחה חדש — כל הנתונים הנוכחיים יועלו לענן</p>
+                                <button class="btn btn-primary" id="sync-create-family-btn" onclick="syncCreateFamily()">🚀 צור משפחה</button>
+                            </div>
+                            <div class="sync-option-card">
+                                <h4>💻 מכשיר נוסף</h4>
+                                <p>הזן קוד משפחה שקיבלת מהמכשיר הראשי</p>
+                                <input type="text" id="sync-join-family-input" placeholder="הדבק קוד משפחה..." class="sync-input">
+                                <button class="btn btn-primary" onclick="syncJoinFamily()">🔗 התחבר</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connected state -->
+                    <div id="sync-connected-panel" style="display:none">
+                        <div class="sync-actions">
+                            <button class="btn btn-outline" onclick="syncPullNow()">⬇️ משוך נתונים עכשיו</button>
+                            <button class="btn btn-outline" onclick="syncPushNow()">⬆️ דחוף נתונים עכשיו</button>
+                            <button class="btn btn-danger btn-small" onclick="syncDisconnect()">🔌 נתק סנכרון</button>
+                        </div>
+
+                        <!-- Online statuses -->
+                        <div class="sync-online-section">
+                            <h4>📡 סטטוס מכשירים</h4>
+                            <div id="sync-online-list" class="sync-online-list">
+                                <p class="text-secondary">טוען...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== STATS SECTION ==================== -->
+            <section id="stats-section" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">📊 סטטיסטיקות ודוחות</h2>
+                </div>
+
+                <div class="stats-tabs">
+                    <button class="stats-tab active" data-stab="profile">👤 פרופיל</button>
+                    <button class="stats-tab" data-stab="history">📈 היסטוריה</button>
+                    <button class="stats-tab stats-parent-only" data-stab="activity">📋 יומן פעילות</button>
+                    <button class="stats-tab stats-parent-only" data-stab="weekly">📊 דוח שבועי</button>
+                </div>
+
+                <!-- Profile Tab -->
+                <div class="stats-content active" id="stats-profile-tab">
+                    <div class="stats-profile-grid">
+                        <div class="stats-accuracy-card">
+                            <div class="accuracy-ring-wrap">
+                                <svg class="accuracy-ring" viewBox="0 0 120 120">
+                                    <circle class="ring-bg" cx="60" cy="60" r="50"/>
+                                    <circle class="ring-fill" cx="60" cy="60" r="50" id="accuracy-circle"/>
+                                </svg>
+                                <div class="accuracy-center-text">
+                                    <div id="accuracy-pct" class="accuracy-pct-val">--%</div>
+                                    <div class="accuracy-pct-label">דיוק</div>
+                                </div>
+                            </div>
+                            <p id="accuracy-detail-text" class="accuracy-detail">0 נכון מתוך 0</p>
+                        </div>
+                        <div class="stats-kpi-grid">
+                            <div class="stats-kpi"><div class="kpi-icon">❓</div><div class="kpi-val" id="stat-q-total">0</div><div class="kpi-label">שאלות נענו</div></div>
+                            <div class="stats-kpi"><div class="kpi-icon">✅</div><div class="kpi-val" id="stat-q-correct">0</div><div class="kpi-label">תשובות נכונות</div></div>
+                            <div class="stats-kpi"><div class="kpi-icon">💰</div><div class="kpi-val" id="stat-coins-earned">0</div><div class="kpi-label">מטבעות נצברו</div></div>
+                            <div class="stats-kpi"><div class="kpi-icon">📋</div><div class="kpi-val" id="stat-tasks-done">0</div><div class="kpi-label">משימות הושלמו</div></div>
+                            <div class="stats-kpi"><div class="kpi-icon">🔥</div><div class="kpi-val" id="stat-streak-val">0</div><div class="kpi-label">ימי רצף</div></div>
+                            <div class="stats-kpi"><div class="kpi-icon">⭐</div><div class="kpi-val" id="stat-level-val">1</div><div class="kpi-label">רמה</div></div>
+                        </div>
+                    </div>
+                    <div class="stats-week-box">
+                        <h3>📅 השבוע</h3>
+                        <div class="week-row">
+                            <div class="week-cell"><span class="week-num" id="week-q">0</span><span>שאלות</span></div>
+                            <div class="week-cell"><span class="week-num" id="week-c">0</span><span>מטבעות</span></div>
+                        </div>
+                    </div>
+                    <div class="stats-achievements-section">
+                        <h3>🏕 הישגים (<span id="achieve-count">0</span>)</h3>
+                        <div id="stats-achieve-grid" class="stats-achieve-grid"></div>
+                    </div>
+                </div>
+
+                <!-- History Chart Tab -->
+                <div class="stats-content" id="stats-history-tab">
+                    <div class="chart-metric-btns">
+                        <button class="metric-btn active" data-metric="questions">❓ שאלות</button>
+                        <button class="metric-btn" data-metric="correct">✅ נכון</button>
+                        <button class="metric-btn" data-metric="coins">💰 מטבעות</button>
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="history-chart"></canvas>
+                    </div>
+                    <p class="chart-note">7 ימים אחרונים</p>
+                </div>
+
+                <!-- Activity Log Tab (parent only) -->
+                <div class="stats-content" id="stats-activity-tab">
+                    <div class="activity-header">
+                        <select id="activity-filter" class="activity-select">
+                            <option value="">כל הילדים</option>
+                        </select>
+                    </div>
+                    <div id="activity-list" class="activity-list"></div>
+                </div>
+
+                <!-- Weekly Report Tab (parent only) -->
+                <div class="stats-content" id="stats-weekly-tab">
+                    <div class="weekly-header">
+                        <span id="weekly-period-text"></span>
+                    </div>
+                    <div id="weekly-cards" class="weekly-cards"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Child Modal -->
+    <!-- Change Child Password Modal -->
+    <div id="change-password-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeChangePasswordModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>🔑 שנה סיסמה</h3>
+                <button class="modal-close" onclick="closeChangePasswordModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="change-password-subtext" style="text-align:center;color:var(--text-secondary);margin-bottom:12px"></p>
+                <div class="setting-group">
+                    <label>סיסמה חדשה</label>
+                    <input type="password" id="change-password-new" placeholder="הזן סיסמה חדשה" class="setting-input">
+                </div>
+                <div id="change-password-error" class="error-message hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeChangePasswordModal()">ביטול</button>
+                <button class="btn btn-primary" onclick="submitChangePassword()">✅ שמור סיסמה</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-child-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeAddChildModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>👦 הוסף ילד חדש</h3>
+                <button class="modal-close" onclick="closeAddChildModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label>שם תצוגה (שם הילד)</label>
+                    <input type="text" id="add-child-displayname" placeholder="למשל: דוד, שרה..." class="setting-input">
+                </div>
+                <div class="setting-group">
+                    <label>שם משתמש (לכניסה)</label>
+                    <input type="text" id="add-child-username" placeholder="באנגלית, ללא רווחים" dir="ltr" class="setting-input">
+                </div>
+                <div class="setting-group">
+                    <label>סיסמה</label>
+                    <input type="password" id="add-child-password" placeholder="סיסמה לילד" class="setting-input">
+                </div>
+                <div id="add-child-error" class="error-message hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAddChildModal()">ביטול</button>
+                <button class="btn btn-primary" onclick="submitAddChild()">✅ צור חשבון</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gift Coins Modal -->
+    <div id="gift-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeGiftModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>🎁 שלח מתנה</h3>
+                <button class="modal-close" onclick="closeGiftModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-secondary" style="margin-bottom:18px">שלח מטבעות לאח או אחות!</p>
+                <div class="setting-group">
+                    <label>למי לשלוח:</label>
+                    <select id="gift-to-user"></select>
+                </div>
+                <div class="setting-group">
+                    <label>כמה מטבעות:</label>
+                    <input type="number" id="gift-amount" min="1" max="9999" value="10">
+                </div>
+                <p id="gift-error" class="hidden" style="color:#e17055;margin-bottom:12px;font-size:0.88rem"></p>
+                <div style="display:flex;gap:10px;justify-content:flex-end">
+                    <button class="btn btn-secondary" onclick="closeGiftModal()">ביטול</button>
+                    <button class="btn btn-primary" onclick="sendGift()">🎁 שלח!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset User Data Modal -->
+    <div id="reset-user-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeResetModal()"></div>
+        <div class="modal-content">
+            <h2>🔄 איפוס נתוני ילד</h2>
+            <p id="reset-user-modal-name" style="font-size:1.1rem;margin-bottom:12px;color:var(--accent)"></p>
+            <p style="margin-bottom:20px;color:var(--text-secondary)">בחר מה לאפס:</p>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+                <button class="btn btn-warning" onclick="confirmResetUser('coins')">💰 אפס מטבעות בלבד</button>
+                <button class="btn btn-warning" onclick="confirmResetUser('questions')">📚 אפס שאלות בלבד</button>
+                <button class="btn btn-danger" onclick="confirmResetUser('all')">💥 אפס הכל (XP, רמה, רצף, הישגים)</button>
+            </div>
+            <button class="btn btn-secondary" onclick="closeResetModal()">ביטול</button>
+        </div>
+    </div>
+
+    <!-- Create Custom Reward / Achievement Modal -->
+    <div id="create-reward-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeCreateRewardModal()"></div>
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h3>🎯 פרס/יעד חדש</h3>
+                <button class="modal-close" onclick="closeCreateRewardModal()">✕</button>
+            </div>
+            <div class="modal-body">
+
+                <!-- Icon picker -->
+                <div class="form-group">
+                    <label>אייקון לפרס</label>
+                    <div class="reward-icon-picker">
+                        <div class="reward-icon-preview" id="reward-icon-preview">🎯</div>
+                        <div class="reward-icon-grid">
+                            <button type="button" class="reward-icon-btn active" onclick="selectRewardIcon(this,'🎯')">🎯</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🏆')">🏆</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🥇')">🥇</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🎖️')">🎖️</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🏅')">🏅</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'👑')">👑</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'⭐')">⭐</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🌟')">🌟</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'💫')">💫</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'✨')">✨</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'⚡')">⚡</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🔥')">🔥</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'💎')">💎</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'💰')">💰</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🎁')">🎁</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🎀')">🎀</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🎂')">🎂</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🍭')">🍭</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🧠')">🧠</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'📚')">📚</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🎓')">🎓</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'💡')">💡</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🔬')">🔬</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🔭')">🔭</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'💪')">💪</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🦸')">🦸</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🎮')">🎮</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🕹️')">🕹️</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🎲')">🎲</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🎨')">🎨</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🎵')">🎵</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🌈')">🌈</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🌸')">🌸</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🌻')">🌻</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🌍')">🌍</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🦁')">🦁</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🐉')">🐉</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🦅')">🦅</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🚀')">🚀</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'❤️')">❤️</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'✅')">✅</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🔑')">🔑</button>
+                            <button type="button" class="reward-icon-btn" onclick="selectRewardIcon(this,'🧩')">🧩</button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="reward-icon" value="🎯">
+                </div>
+
+                <div class="form-group">
+                    <label>שם הפרס *</label>
+                    <input type="text" id="reward-title" placeholder="לדוגמה: מתמטיקאי מצטיין">
+                </div>
+                <div class="form-group">
+                    <label>תיאור (אופציונלי)</label>
+                    <input type="text" id="reward-desc" placeholder="לדוגמה: ענה נכון על 20 שאלות מתמטיקה">
+                </div>
+
+                <div class="reward-two-col">
+                    <div class="form-group">
+                        <label>סוג יעד</label>
+                        <select id="reward-goal-type">
+                            <option value="questions">❓ שאלות שנענו</option>
+                            <option value="correct">✅ תשובות נכונות</option>
+                            <option value="consecutive">🔥 תשובות נכונות ברצף</option>
+                            <option value="tasks">📋 משימות שהושלמו</option>
+                            <option value="streak">🔥 ימי רצף</option>
+                            <option value="xp">⭐ XP שנצבר</option>
+                            <option value="level">🏆 דרגה שהושגה</option>
+                            <option value="coins_earned">💰 מטבעות שנצברו</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>ערך יעד</label>
+                        <input type="number" id="reward-goal-value" min="1" value="10">
+                    </div>
+                </div>
+
+                <div class="reward-two-col">
+                    <div class="form-group">
+                        <label>💰 פרס במטבעות</label>
+                        <input type="number" id="reward-coins" min="0" value="50">
+                    </div>
+                    <div class="form-group">
+                        <label>מיועד ל</label>
+                        <select id="reward-assigned-to">
+                            <option value="all">👥 כל הילדים</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeCreateRewardModal()">ביטול</button>
+                <button class="btn btn-primary" onclick="saveCustomReward()">✅ שמור פרס</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Create/Edit Modal -->
+    <div id="task-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeTaskModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="task-modal-title">➕ צור משימה חדשה</h3>
+                <button class="modal-close" onclick="closeTaskModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>שם המשימה</label>
+                    <input type="text" id="task-title" placeholder="לדוגמה: סדר את החדר">
+                </div>
+                <div class="form-group">
+                    <label>תיאור (אופציונלי)</label>
+                    <textarea id="task-description" placeholder="תאר את המשימה..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>פרס (מטבעות)</label>
+                    <input type="number" id="task-reward" value="50" min="1">
+                </div>
+                <div class="form-group">
+                    <label>מיועד ל-</label>
+                    <select id="task-assigned-to">
+                        <option value="all">כל הילדים</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🔑 קוד אישור</label>
+                    <input type="text" id="task-approval-code" placeholder="קוד שהילד יזין כשיסיים">
+                    <small style="color:#888;display:block;margin-top:4px">הילד יצטרך להזין קוד זה כדי לקבל את הפרס</small>
+                </div>
+                <div class="form-group">
+                    <label>⭐ רמת דחיפות</label>
+                    <select id="task-priority">
+                        <option value="normal">⭐ רגיל</option>
+                        <option value="important">⭐⭐ חשוב</option>
+                        <option value="urgent">⭐⭐⭐ דחוף</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🔄 משימה חוזרת</label>
+                    <select id="task-recurring">
+                        <option value="none">ללא — חד פעמית</option>
+                        <option value="daily">כל יום</option>
+                        <option value="weekly">כל שבוע</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📅 תאריך יעד</label>
+                    <input type="date" id="task-deadline">
+                    <small style="color:#888;display:block;margin-top:4px">אופציונלי — אם עבר התאריך, המשימה תוצג כ"פג תוקף"</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeTaskModal()">ביטול</button>
+                <button class="btn btn-primary" id="save-task-btn">שמור משימה</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Add/Edit Modal -->
+    <div id="question-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeQuestionModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="question-modal-title">➕ שאלה חדשה</h3>
+                <button class="modal-close" onclick="closeQuestionModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>❓ טקסט השאלה</label>
+                    <textarea id="q-text" rows="3" placeholder="לדוגמה: מה הצבע של השמיים?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>📚 נושא (אופציונלי)</label>
+                    <input type="text" id="q-subject" placeholder="לדוגמה: מדע, היסטוריה...">
+                </div>
+                <div class="form-group">
+                    <label>תשובות (לחץ ✔️ כדי לסמן כנכונה)</label>
+                    <div id="q-options-list" class="q-options-list"></div>
+                    <button class="btn btn-outline btn-small" style="margin-top:8px" onclick="addQuestionOption()">➕ הוסף תשובה</button>
+                </div>
+                <div class="form-group">
+                    <label>💡 הסבר (אופציונלי)</label>
+                    <textarea id="q-explanation" rows="2" placeholder="הסבר קצר שיוצג לאחר מענה..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeQuestionModal()">ביטול</button>
+                <button class="btn btn-primary" id="save-question-btn">שמור שאלה</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Add/Edit Modal -->
+    <div id="game-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeGameModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="game-modal-title">➕ הוסף משחק</h3>
+                <button class="modal-close" onclick="closeGameModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>שם המשחק</label>
+                    <input type="text" id="game-name" placeholder="לדוגמה: מיינקראפט">
+                </div>
+                <div class="form-group">
+                    <label>נתיב לקובץ (EXE)</label>
+                    <div class="file-input-group">
+                        <input type="text" id="game-exe-path" placeholder="C:\Games\game.exe" readonly>
+                        <button class="btn btn-outline" id="browse-exe-btn">📂 בחר קובץ</button>
+                    </div>
+                    <div class="exe-modal-help">
+                        <button type="button" class="exe-modal-help-btn" onclick="toggleModalExeHelp()">❓ איך מוצאים את קובץ המשחק ב-Steam / Epic?</button>
+                        <div class="exe-modal-help-body hidden" id="exe-modal-help-body">
+                            <div class="exe-mini-row">
+                                <div class="exe-mini-block">
+                                    <strong>🔵 Steam</strong>
+                                    <p>ספרייה → קליק ימני על המשחק → <strong>נהל</strong> → <strong>עיין בקבצים מקומיים</strong> → בחר את <code>.exe</code> הראשי</p>
+                                </div>
+                                <div class="exe-mini-block">
+                                    <strong>⚫ Epic Games</strong>
+                                    <p>ספרייה → <strong>...</strong> ליד המשחק → <strong>Manage</strong> → פתח תיקייה → <code>Binaries\Win64\*.exe</code></p>
+                                </div>
+                            </div>
+                            <div class="exe-mini-tip">💡 בדרך כלל: קליק ימני על איקון המשחק בשולחן העבודה → <strong>פתח מיקום קובץ</strong> — זה מוביל ישר לה-EXE!</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>מחיר (מטבעות)</label>
+                    <input type="number" id="game-price" value="100" min="0">
+                </div>
+                <div class="form-group">
+                    <label>תפוגת המשחק</label>
+                    <div class="expiry-options">
+                        <label class="expiry-radio"><input type="radio" name="game-expiry" value="0" checked> בלי הגבלה</label>
+                        <label class="expiry-radio"><input type="radio" name="game-expiry" value="1"> יום</label>
+                        <label class="expiry-radio"><input type="radio" name="game-expiry" value="3"> 3 ימים</label>
+                        <label class="expiry-radio"><input type="radio" name="game-expiry" value="7"> שבוע</label>
+                        <label class="expiry-radio"><input type="radio" name="game-expiry" value="14"> 14 ימים</label>
+                        <label class="expiry-radio"><input type="radio" name="game-expiry" value="30"> חודש</label>
+                        <label class="expiry-radio custom-expiry-label">
+                            <input type="radio" name="game-expiry" value="custom"> מספר ימים:
+                            <input type="number" id="game-expiry-custom" min="1" max="365" value="7" class="expiry-custom-input">
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>אייקון</label>
+                    <div class="icon-selector" id="game-icon-selector">
+                        <span class="icon-option selected" data-icon="🎮">🎮</span>
+                        <span class="icon-option" data-icon="⚽">⚽</span>
+                        <span class="icon-option" data-icon="🏎️">🏎️</span>
+                        <span class="icon-option" data-icon="🧩">🧩</span>
+                        <span class="icon-option" data-icon="⚔️">⚔️</span>
+                        <span class="icon-option" data-icon="🏰">🏰</span>
+                        <span class="icon-option" data-icon="🚀">🚀</span>
+                        <span class="icon-option" data-icon="🎯">🎯</span>
+                        <span class="icon-option" data-icon="🎲">🎲</span>
+                        <span class="icon-option" data-icon="🌍">🌍</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>📂 קטגוריה</label>
+                    <select id="game-category">
+                        <option value="other">🎲 אחר</option>
+                        <option value="educational">📚 חינוכי</option>
+                        <option value="adventure">⚔️ הרפתקאות</option>
+                        <option value="sports">⚽ ספורט</option>
+                        <option value="puzzles">🧩 פאזלים</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeGameModal()">ביטול</button>
+                <button class="btn btn-primary" id="save-game-btn">שמור משחק</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIN Approval Modal -->
+    <div id="pin-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closePinModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>🔑 אישור הורה</h3>
+                <button class="modal-close" onclick="closePinModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p id="pin-modal-message">הזן קוד PIN של ההורה לאישור</p>
+                <div class="pin-input-container">
+                    <input type="password" id="pin-input" maxlength="8" placeholder="קוד PIN" class="pin-input">
+                </div>
+                <div id="pin-error" class="error-message hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closePinModal()">ביטול</button>
+                <button class="btn btn-primary" id="pin-confirm-btn">אשר</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coins Management Modal -->
+    <div id="coins-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeCoinsModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>💰 ניהול מטבעות</h3>
+                <button class="modal-close" onclick="closeCoinsModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="time-modal-name" id="coins-modal-name"></p>
+                <div class="time-modal-current">
+                    <span class="label">יתרה נוכחית:</span>
+                    <span class="value" id="coins-modal-current">—</span>
+                    <span style="color:var(--text-secondary)">💰</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">כמות מטבעות</label>
+                    <input type="number" id="coins-modal-amount" class="form-input" min="1" value="50" placeholder="מטבעות">
+                </div>
+                <div class="time-modal-actions">
+                    <button class="btn btn-success btn-block" onclick="submitCoinsChange('add')">➕ הוסף מטבעות</button>
+                    <button class="btn btn-danger btn-block" onclick="submitCoinsChange('subtract')">➖ הפחת מטבעות</button>
+                    <button class="btn btn-outline btn-block" onclick="submitCoinsChange('set')">🔄 קבע יתרה חדשה</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeCoinsModal()">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Theme Modal (Admin) -->
+    <div id="user-theme-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeUserThemeModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>🎨 ערכת נושא</h3>
+                <button class="modal-close" onclick="closeUserThemeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="time-modal-name" id="user-theme-modal-name"></p>
+                <div id="user-theme-grid" class="user-theme-grid"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="applyUserThemeModal()">✅ החל</button>
+                <button class="btn btn-outline" onclick="closeUserThemeModal()">ביטול</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Management Modal -->
+    <div id="time-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeTimeModal()"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>⏱️ ניהול זמן מחשב</h3>
+                <button class="modal-close" onclick="closeTimeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="time-modal-name" id="time-modal-name"></p>
+                <div class="time-modal-current">
+                    <span class="label">זמן נוכחי:</span>
+                    <span class="value" id="time-modal-current">—</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">מספר דקות</label>
+                    <input type="number" id="time-modal-minutes" class="form-input" min="1" max="480" value="30" placeholder="דקות">
+                </div>
+                <div class="time-modal-actions">
+                    <button class="btn btn-success btn-block" onclick="submitTimeChange('add')">➕ הוסף זמן</button>
+                    <button class="btn btn-danger btn-block" onclick="submitTimeChange('subtract')">➖ הפחת זמן</button>
+                    <button class="btn btn-outline btn-block" onclick="submitTimeChange('set')">🔄 קבע זמן חדש</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeTimeModal()">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Modal -->
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeProfileModal()"></div>
+        <div class="modal-content profile-modal-content">
+            <button class="modal-close" onclick="closeProfileModal()">✕</button>
+
+            <!-- Hero section: avatar + name + level -->
+            <div class="profile-hero" id="profile-hero">
+                <div class="profile-avatar-wrap" id="profile-avatar-wrap">
+                    <div class="profile-avatar-img-el" id="profile-avatar-img-el"></div>
+                </div>
+                <div class="profile-hero-info">
+                    <div class="profile-display-name" id="profile-display-name">—</div>
+                    <div class="profile-username" id="profile-username">—</div>
+                    <div class="profile-level-row">
+                        <span class="profile-badge" id="profile-badge">🌱</span>
+                        <span class="profile-level-title" id="profile-level-title">מתחיל</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- XP bar -->
+            <div class="profile-xp-section">
+                <div class="profile-xp-row">
+                    <span id="profile-xp-label">0 XP</span>
+                    <span id="profile-xp-next" class="profile-xp-next-label"></span>
+                </div>
+                <div class="profile-xp-track">
+                    <div class="profile-xp-fill" id="profile-xp-fill" style="width:0%"></div>
+                </div>
+            </div>
+
+            <!-- Stats grid -->
+            <div class="profile-stats-grid" id="profile-stats-grid">
+                <div class="profile-stat">
+                    <span class="profile-stat-icon">💰</span>
+                    <span class="profile-stat-val" id="pstat-coins">0</span>
+                    <span class="profile-stat-lbl">מטבעות</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-icon">🔥</span>
+                    <span class="profile-stat-val" id="pstat-streak">0</span>
+                    <span class="profile-stat-lbl">ימים ברצף</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-icon">✅</span>
+                    <span class="profile-stat-val" id="pstat-correct">0</span>
+                    <span class="profile-stat-lbl">נכונות</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-icon">📖</span>
+                    <span class="profile-stat-val" id="pstat-total">0</span>
+                    <span class="profile-stat-lbl">שאלות</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-icon">🎯</span>
+                    <span class="profile-stat-val" id="pstat-accuracy">—</span>
+                    <span class="profile-stat-lbl">דיוק</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-icon">📋</span>
+                    <span class="profile-stat-val" id="pstat-tasks">0</span>
+                    <span class="profile-stat-lbl">משימות</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-icon">💫</span>
+                    <span class="profile-stat-val" id="pstat-earned">0</span>
+                    <span class="profile-stat-lbl">הרוויח סה"כ</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-icon">⭐</span>
+                    <span class="profile-stat-val" id="pstat-xp">0</span>
+                    <span class="profile-stat-lbl">XP</span>
+                </div>
+            </div>
+
+            <!-- Weekly -->
+            <div class="profile-section-title">📅 השבוע</div>
+            <div class="profile-weekly-row">
+                <div class="profile-weekly-item">
+                    <span id="pweek-q">0</span>
+                    <small>שאלות</small>
+                </div>
+                <div class="profile-weekly-item">
+                    <span id="pweek-coins">0</span>
+                    <small>💰 הרוויח</small>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="profile-section-title" id="profile-ach-title">🏅 הישגים</div>
+            <div class="profile-achievements" id="profile-achievements"></div>
+        </div>
+    </div>
+
+    <div id="achievements-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeAchievementsModal()"></div>
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h3>🏅 הישגים</h3>
+                <button class="modal-close" onclick="closeAchievementsModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="achievements-summary" id="achievements-summary"></div>
+                <div class="achievements-grid" id="achievements-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Up Overlay -->
+    <div id="levelup-overlay" class="levelup-overlay hidden">
+        <div class="levelup-content">
+            <div class="levelup-badge" id="levelup-badge">⭐</div>
+            <h2 class="levelup-title">עלית דרגה!</h2>
+            <p class="levelup-detail" id="levelup-detail">דרגה 2 — לומד</p>
+            <button class="btn btn-primary" onclick="closeLevelUp()">יאללה! 🎉</button>
+        </div>
+    </div>
+
+    <!-- Birthday Overlay -->
+    <div id="birthday-overlay" class="birthday-overlay hidden">
+        <div class="birthday-content">
+            <div class="birthday-emoji">🎂</div>
+            <h2>יום הולדת שמח!</h2>
+            <p id="birthday-bonus-text">קיבלת 100 מטבעות בונוס!</p>
+            <button class="btn btn-primary btn-large" onclick="closeBirthdayOverlay()">🎉 תודה!</button>
+        </div>
+    </div>
+
+    <!-- Confetti Canvas (fixed overlay, pointer-events:none) -->
+    <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeConfirm(false)"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 id="confirm-modal-title">⚠️ אישור</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-modal-message" class="confirm-modal-text"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="confirm-cancel-btn">ביטול</button>
+                <button class="btn btn-danger" id="confirm-ok-btn">כן, אני בטוח</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="tooltip-popup" role="tooltip"></div>
+
+    <!-- Achievement Unlock Toast -->
+    <div id="achievement-toast" class="achievement-toast hidden">
+        <div class="achievement-toast-icon" id="ach-toast-icon">🏅</div>
+        <div class="achievement-toast-info">
+            <div class="achievement-toast-title">הישג חדש!</div>
+            <div class="achievement-toast-name" id="ach-toast-name"></div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Image Modal -->
+    <div id="image-modal" class="image-modal hidden">
+        <div class="image-modal-backdrop" onclick="closeImageModal()"></div>
+        <div class="image-modal-content">
+            <button class="image-modal-close" onclick="closeImageModal()">✕</button>
+            <img id="modal-image" src="" alt="">
+            <div class="image-modal-name" id="modal-item-name"></div>
+        </div>
+    </div>
+
+    <script src="../../node_modules/chart.js/dist/chart.umd.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/questions.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/games.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/social.js"></script>
+    <script src="js/customization.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/onboarding.js"></script>
+    <script src="js/init.js"></script>
+</body>
+</html>

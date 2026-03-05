@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KidScreen - זמן מסך</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            user-select: none;
+        }
+        .lock-container {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+        }
+        .lock-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            color: #aaa;
+            margin-bottom: 40px;
+        }
+        .user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 1.1em;
+        }
+        .user-info span { color: #ccc; }
+        .user-info strong { color: #ffd700; }
+        .buy-section {
+            margin-bottom: 30px;
+        }
+        .buy-section h3 {
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+        .time-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .time-btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            border: none;
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+        .time-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+        }
+        .time-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .time-btn small {
+            display: block;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+        .divider {
+            margin: 25px 0;
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .pin-section h3 {
+            margin-bottom: 15px;
+            color: #aaa;
+            font-weight: normal;
+        }
+        .pin-input {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.15);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            text-align: center;
+            width: 200px;
+            letter-spacing: 8px;
+            outline: none;
+            font-family: inherit;
+        }
+        .pin-input:focus {
+            border-color: #6c5ce7;
+        }
+        .pin-submit {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        .pin-submit:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        .error-msg {
+            color: #ff6b6b;
+            margin-top: 10px;
+            font-size: 0.9em;
+            min-height: 20px;
+        }
+        .pin-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="lock-container">
+        <div class="lock-icon">⏰</div>
+        <h1>הזמן שלך נגמר!</h1>
+        <p class="subtitle">הרוויח מטבעות כדי לקנות עוד זמן מחשב</p>
+
+        <div class="user-info">
+            <span>👤 <strong id="lock-user-name">...</strong></span>
+            <span>💰 <strong id="lock-user-coins">0</strong> מטבעות</span>
+        </div>
+
+        <div class="buy-section">
+            <h3>💰 קנה זמן עם מטבעות</h3>
+            <div class="time-buttons">
+                <button class="time-btn" data-minutes="5">5 דקות<small id="price-5"></small></button>
+                <button class="time-btn" data-minutes="15">15 דקות<small id="price-15"></small></button>
+                <button class="time-btn" data-minutes="30">30 דקות<small id="price-30"></small></button>
+            </div>
+            <p class="error-msg" id="buy-error"></p>
+        </div>
+
+        <hr class="divider">
+
+        <div class="pin-section">
+            <h3>🔑 או בקש מההורה לפתוח</h3>
+            <div class="pin-row">
+                <input type="password" class="pin-input" id="lock-pin" maxlength="8" placeholder="PIN">
+                <button class="pin-submit" id="lock-pin-submit">פתח</button>
+            </div>
+            <p class="error-msg" id="pin-error"></p>
+        </div>
+    </div>
+
+    <script>
+        async function loadUserInfo() {
+            const info = await window.api.lock.getUserInfo();
+            if (info) {
+                document.getElementById('lock-user-name').textContent = info.displayName;
+                document.getElementById('lock-user-coins').textContent = info.coins;
+                const rate = info.coinsPerMinute;
+                document.getElementById('price-5').textContent = `${5 * rate} 💰`;
+                document.getElementById('price-15').textContent = `${15 * rate} 💰`;
+                document.getElementById('price-30').textContent = `${30 * rate} 💰`;
+                
+                document.querySelectorAll('.time-btn').forEach(btn => {
+                    const mins = parseInt(btn.dataset.minutes);
+                    btn.disabled = info.coins < mins * rate;
+                });
+            }
+        }
+
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const minutes = parseInt(btn.dataset.minutes);
+                btn.disabled = true;
+                const result = await window.api.lock.buyTime({ minutes });
+                if (!result.success) {
+                    document.getElementById('buy-error').textContent = result.error || 'שגיאה';
+                    btn.disabled = false;
+                }
+            });
+        });
+
+        document.getElementById('lock-pin-submit').addEventListener('click', async () => {
+            const pin = document.getElementById('lock-pin').value;
+            if (!pin) return;
+            const result = await window.api.lock.dismiss({ pin });
+            if (!result.success) {
+                document.getElementById('pin-error').textContent = result.error || 'קוד שגוי';
+                document.getElementById('lock-pin').value = '';
+            }
+        });
+
+        document.getElementById('lock-pin').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('lock-pin-submit').click();
+        });
+
+        loadUserInfo();
+    </script>
+</body>
+</html>

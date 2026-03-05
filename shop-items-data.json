@@ -1,0 +1,972 @@
+{
+  "games": [
+    {
+      "id": "פרוזה",
+      "name": "פרוזה",
+      "price": 800,
+      "image": "prvzh.jpg",
+      "category": "games"
+    }
+  ],
+  "items": [
+    {
+      "id": "אוהל",
+      "name": "אוהל",
+      "price": 20,
+      "image": "avhl.png",
+      "category": "buildings"
+    },
+    {
+      "id": "אוהל_3",
+      "name": "אוהל 3",
+      "price": 20,
+      "image": "avhl_3.png",
+      "category": "buildings"
+    },
+    {
+      "id": "אוהל_4",
+      "name": "אוהל 4",
+      "price": 20,
+      "image": "avhl_4.png",
+      "category": "buildings"
+    },
+    {
+      "id": "אוהל_5",
+      "name": "אוהל 5",
+      "price": 20,
+      "image": "avhl_5.png",
+      "category": "buildings"
+    },
+    {
+      "id": "אוהל_כפול",
+      "name": "אוהל כפול",
+      "price": 20,
+      "image": "avhl_kpvl.png",
+      "category": "buildings"
+    },
+    {
+      "id": "בית_1",
+      "name": "בית 1",
+      "price": 20,
+      "image": "byt_1.png",
+      "category": "buildings"
+    },
+    {
+      "id": "בית_2",
+      "name": "בית 2",
+      "price": 20,
+      "image": "byt_2.png",
+      "category": "buildings"
+    },
+    {
+      "id": "בית_3",
+      "name": "בית 3",
+      "price": 20,
+      "image": "byt_3.png",
+      "category": "buildings"
+    },
+    {
+      "id": "בית_4",
+      "name": "בית 4",
+      "price": 20,
+      "image": "byt_4.png",
+      "category": "buildings"
+    },
+    {
+      "id": "בית_6",
+      "name": "בית 6",
+      "price": 20,
+      "image": "byt_6.png",
+      "category": "buildings"
+    },
+    {
+      "id": "בית_7",
+      "name": "בית 7",
+      "price": 20,
+      "image": "byt_7.png",
+      "category": "buildings"
+    },
+    {
+      "id": "בית_8",
+      "name": "בית 8",
+      "price": 20,
+      "image": "byt_8.png",
+      "category": "buildings"
+    },
+    {
+      "id": "בית_כפרי",
+      "name": "בית כפרי",
+      "price": 20,
+      "image": "byt_kpry.png",
+      "category": "buildings"
+    },
+    {
+      "id": "בית_שווה",
+      "name": "בית שווה",
+      "price": 20,
+      "image": "byt_shvvh.png",
+      "category": "buildings"
+    },
+    {
+      "id": "חבית",
+      "name": "חבית",
+      "price": 20,
+      "image": "chbyt.png",
+      "category": "buildings"
+    },
+    {
+      "id": "חומת_טירה",
+      "name": "חומת טירה",
+      "price": 20,
+      "image": "chvmt_tyrh.png",
+      "category": "buildings"
+    },
+    {
+      "id": "חומת_טירה_2",
+      "name": "חומת טירה 2",
+      "price": 20,
+      "image": "chvmt_tyrh_2.png",
+      "category": "buildings"
+    },
+    {
+      "id": "טירת_קרח",
+      "name": "טירת קרח",
+      "price": 20,
+      "image": "tyrt_krch.png",
+      "category": "buildings"
+    },
+    {
+      "id": "מאהל",
+      "name": "מאהל",
+      "price": 20,
+      "image": "mahl.png",
+      "category": "buildings"
+    },
+    {
+      "id": "מבנה_קפוא",
+      "name": "מבנה קפוא",
+      "price": 20,
+      "image": "mbnh_kpva.png",
+      "category": "buildings"
+    },
+    {
+      "id": "מגדל",
+      "name": "מגדל",
+      "price": 20,
+      "image": "mgdl.png",
+      "category": "buildings"
+    },
+    {
+      "id": "מגדל_2",
+      "name": "מגדל 2",
+      "price": 20,
+      "image": "mgdl_2.png",
+      "category": "buildings"
+    },
+    {
+      "id": "מגדל_3",
+      "name": "מגדל 3",
+      "price": 20,
+      "image": "mgdl_3.png",
+      "category": "buildings"
+    },
+    {
+      "id": "תחנת_חשמל_קפואה",
+      "name": "תחנת חשמל קפואה",
+      "price": 20,
+      "image": "tchnt_chshml_kpvah.png",
+      "category": "buildings"
+    },
+    {
+      "id": "תחנת_רוח",
+      "name": "תחנת רוח",
+      "price": 20,
+      "image": "tchnt_rvch.png",
+      "category": "buildings"
+    },
+    {
+      "id": "אולף",
+      "name": "אולף",
+      "price": 20,
+      "image": "avlf.png",
+      "category": "characters"
+    },
+    {
+      "id": "אלזה",
+      "name": "אלזה",
+      "price": 20,
+      "image": "alzh.png",
+      "category": "characters"
+    },
+    {
+      "id": "האגריד",
+      "name": "האגריד",
+      "price": 20,
+      "image": "hagryd.png",
+      "category": "characters"
+    },
+    {
+      "id": "הארי_פוטר",
+      "name": "הארי פוטר",
+      "price": 20,
+      "image": "hary_pvtr.png",
+      "category": "characters"
+    },
+    {
+      "id": "יוניקורן_על_מריצה",
+      "name": "יוניקורן על מריצה",
+      "price": 20,
+      "image": "yvnykvrn_al_mrytzh.png",
+      "category": "characters"
+    },
+    {
+      "id": "עידן_הקרח",
+      "name": "עידן הקרח",
+      "price": 20,
+      "image": "aydn_hkrch.png",
+      "category": "characters"
+    },
+    {
+      "id": "אש",
+      "name": "אש",
+      "price": 20,
+      "image": "ash.png",
+      "category": "decorations"
+    },
+    {
+      "id": "אש_ירוקה",
+      "name": "אש ירוקה",
+      "price": 20,
+      "image": "ash_yrvkh.png",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל",
+      "name": "דגל",
+      "price": 20,
+      "image": "dgl.png",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_2",
+      "name": "דגל 2",
+      "price": 20,
+      "image": "dgl_2.png",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_3",
+      "name": "דגל 3",
+      "price": 20,
+      "image": "dgl_3.png",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_4",
+      "name": "דגל 4",
+      "price": 20,
+      "image": "dgl_4.png",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_5",
+      "name": "דגל 5",
+      "price": 20,
+      "image": "dgl_5.png",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_הארי_פוטר",
+      "name": "דגל הארי פוטר",
+      "price": 20,
+      "image": "dgl_hary_pvtr.jpg",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_הוגוורטס",
+      "name": "דגל הוגוורטס",
+      "price": 20,
+      "image": "dgl_hvgvvrts.jpg",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_קפוא_1",
+      "name": "דגל קפוא 1",
+      "price": 20,
+      "image": "dgl_kpva_1.png",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_קפוא_2",
+      "name": "דגל קפוא 2",
+      "price": 20,
+      "image": "dgl_kpva_2.png",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_קפוא_3",
+      "name": "דגל קפוא 3",
+      "price": 20,
+      "image": "dgl_kpva_3.png",
+      "category": "decorations"
+    },
+    {
+      "id": "דגל_של_גריפינדור",
+      "name": "דגל של גריפינדור",
+      "price": 20,
+      "image": "dgl_shl_grypyndvr.jpg",
+      "category": "decorations"
+    },
+    {
+      "id": "לפיד",
+      "name": "לפיד",
+      "price": 20,
+      "image": "lpyd.png",
+      "category": "decorations"
+    },
+    {
+      "id": "לפיד_קרח",
+      "name": "לפיד קרח",
+      "price": 20,
+      "image": "lpyd_krch.png",
+      "category": "decorations"
+    },
+    {
+      "id": "מדורה",
+      "name": "מדורה",
+      "price": 20,
+      "image": "mdvrh.png",
+      "category": "decorations"
+    },
+    {
+      "id": "מנורת_רחוב",
+      "name": "מנורת רחוב",
+      "price": 20,
+      "image": "mnvrt_rchvb.png",
+      "category": "decorations"
+    },
+    {
+      "id": "מנורת_רחוב_2",
+      "name": "מנורת רחוב 2",
+      "price": 20,
+      "image": "mnvrt_rchvb_2.png",
+      "category": "decorations"
+    },
+    {
+      "id": "מנורת_רחוב_3",
+      "name": "מנורת רחוב 3",
+      "price": 20,
+      "image": "mnvrt_rchvb_3.png",
+      "category": "decorations"
+    },
+    {
+      "id": "קישוט_קרח",
+      "name": "קישוט קרח",
+      "price": 20,
+      "image": "kyshvt_krch.png",
+      "category": "decorations"
+    },
+    {
+      "id": "שלטי_ניווט",
+      "name": "שלטי ניווט",
+      "price": 20,
+      "image": "shlty_nyvvt.png",
+      "category": "decorations"
+    },
+    {
+      "id": "תאורה",
+      "name": "תאורה",
+      "price": 20,
+      "image": "tavrh.png",
+      "category": "decorations"
+    },
+    {
+      "id": "תאורה_ירוקה",
+      "name": "תאורה ירוקה",
+      "price": 20,
+      "image": "tavrh_yrvkh.png",
+      "category": "decorations"
+    },
+    {
+      "id": "תאורה_כתומה",
+      "name": "תאורה כתומה",
+      "price": 20,
+      "image": "tavrh_ktvmh.png",
+      "category": "decorations"
+    },
+    {
+      "id": "עשן",
+      "name": "עשן",
+      "price": 20,
+      "image": "ashn.png",
+      "category": "effects"
+    },
+    {
+      "id": "פויקה",
+      "name": "פויקה",
+      "price": 20,
+      "image": "pvykh.png",
+      "category": "effects"
+    },
+    {
+      "id": "מזרקה_קפואה",
+      "name": "מזרקה קפואה",
+      "price": 20,
+      "image": "mzrkh_kpvah.png",
+      "category": "frozen"
+    },
+    {
+      "id": "שיבור_קרח",
+      "name": "שיבור קרח",
+      "price": 20,
+      "image": "shybvr_krch.png",
+      "category": "frozen"
+    },
+    {
+      "id": "תאורת_רחוב_קפואה",
+      "name": "תאורת רחוב קפואה",
+      "price": 20,
+      "image": "tavrt_rchvb_kpvah.png",
+      "category": "frozen"
+    },
+    {
+      "id": "תאורת_רחוב_קפואה2",
+      "name": "תאורת רחוב קפואה2",
+      "price": 20,
+      "image": "tavrt_rchvb_kpvah2.png",
+      "category": "frozen"
+    },
+    {
+      "id": "כיסא",
+      "name": "כיסא",
+      "price": 20,
+      "image": "kysa.png",
+      "category": "furniture"
+    },
+    {
+      "id": "כיסא_מלכותי",
+      "name": "כיסא מלכותי",
+      "price": 20,
+      "image": "kysa_mlkvty.png",
+      "category": "furniture"
+    },
+    {
+      "id": "כרכרה",
+      "name": "כרכרה",
+      "price": 20,
+      "image": "krkrh.png",
+      "category": "furniture"
+    },
+    {
+      "id": "ספסל",
+      "name": "ספסל",
+      "price": 20,
+      "image": "spsl.png",
+      "category": "furniture"
+    },
+    {
+      "id": "שולחן",
+      "name": "שולחן",
+      "price": 20,
+      "image": "shvlchn.png",
+      "category": "furniture"
+    },
+    {
+      "id": "שולחן_2",
+      "name": "שולחן 2",
+      "price": 20,
+      "image": "shvlchn_2.png",
+      "category": "furniture"
+    },
+    {
+      "id": "שולחן_3",
+      "name": "שולחן 3",
+      "price": 20,
+      "image": "shvlchn_3.png",
+      "category": "furniture"
+    },
+    {
+      "id": "שולחן_4",
+      "name": "שולחן 4",
+      "price": 20,
+      "image": "shvlchn_4.png",
+      "category": "furniture"
+    },
+    {
+      "id": "שולחן_מלחמה",
+      "name": "שולחן מלחמה",
+      "price": 20,
+      "image": "shvlchn_mlchmh.png",
+      "category": "furniture"
+    },
+    {
+      "id": "באר",
+      "name": "באר",
+      "price": 20,
+      "image": "bar.png",
+      "category": "market"
+    },
+    {
+      "id": "באר_2",
+      "name": "באר 2",
+      "price": 20,
+      "image": "bar_2.png",
+      "category": "market"
+    },
+    {
+      "id": "באר_מים_2",
+      "name": "באר מים 2",
+      "price": 20,
+      "image": "bar_mym_2.png",
+      "category": "market"
+    },
+    {
+      "id": "עגלה",
+      "name": "עגלה",
+      "price": 20,
+      "image": "aglh.png",
+      "category": "market"
+    },
+    {
+      "id": "קופסא",
+      "name": "קופסא",
+      "price": 20,
+      "image": "kvpsa.png",
+      "category": "market"
+    },
+    {
+      "id": "שוק",
+      "name": "שוק",
+      "price": 20,
+      "image": "shvk.png",
+      "category": "market"
+    },
+    {
+      "id": "שוק_2",
+      "name": "שוק 2",
+      "price": 20,
+      "image": "shvk_2.png",
+      "category": "market"
+    },
+    {
+      "id": "שוק_3",
+      "name": "שוק 3",
+      "price": 20,
+      "image": "shvk_3.png",
+      "category": "market"
+    },
+    {
+      "id": "תיבת_דואר",
+      "name": "תיבת דואר",
+      "price": 20,
+      "image": "tybt_dvar.png",
+      "category": "market"
+    },
+    {
+      "id": "מיינקראפט_יהלום",
+      "name": "מיינקראפט יהלום",
+      "price": 20,
+      "image": "myynkrapt_yhlvm.png",
+      "category": "minecraft"
+    },
+    {
+      "id": "אבן",
+      "name": "אבן",
+      "price": 20,
+      "image": "abn.png",
+      "category": "nature"
+    },
+    {
+      "id": "אבן_2",
+      "name": "אבן 2",
+      "price": 20,
+      "image": "abn_2.png",
+      "category": "nature"
+    },
+    {
+      "id": "בול_עץ",
+      "name": "בול עץ",
+      "price": 20,
+      "image": "bvl_atz.png",
+      "category": "nature"
+    },
+    {
+      "id": "מיינקראפט_עץ",
+      "name": "מיינקראפט עץ",
+      "price": 20,
+      "image": "myynkrapt_atz.png",
+      "category": "nature"
+    },
+    {
+      "id": "מיינקראפט_עץ_2",
+      "name": "מיינקראפט עץ 2",
+      "price": 20,
+      "image": "myynkrapt_atz_2.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ",
+      "name": "עץ",
+      "price": 20,
+      "image": "atz.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_10",
+      "name": "עץ 10",
+      "price": 20,
+      "image": "atz_10.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_11",
+      "name": "עץ 11",
+      "price": 20,
+      "image": "atz_11.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_12",
+      "name": "עץ 12",
+      "price": 20,
+      "image": "atz_12.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_13",
+      "name": "עץ 13",
+      "price": 20,
+      "image": "atz_13.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_5",
+      "name": "עץ 5",
+      "price": 20,
+      "image": "atz_5.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_6",
+      "name": "עץ 6",
+      "price": 20,
+      "image": "atz_6.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_7",
+      "name": "עץ 7",
+      "price": 20,
+      "image": "atz_7.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_8",
+      "name": "עץ 8",
+      "price": 20,
+      "image": "atz_8.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_9",
+      "name": "עץ 9",
+      "price": 20,
+      "image": "atz_9.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_שךג_4",
+      "name": "עץ שךג 4",
+      "price": 20,
+      "image": "atz_shkg_4.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_שלג",
+      "name": "עץ שלג",
+      "price": 20,
+      "image": "atz_shlg.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_שלג_2",
+      "name": "עץ שלג 2",
+      "price": 20,
+      "image": "atz_shlg_2.png",
+      "category": "nature"
+    },
+    {
+      "id": "עץ_שלג_3",
+      "name": "עץ שלג 3",
+      "price": 20,
+      "image": "atz_shlg_3.png",
+      "category": "nature"
+    },
+    {
+      "id": "קריסטל",
+      "name": "קריסטל",
+      "price": 20,
+      "image": "krystl.png",
+      "category": "nature"
+    },
+    {
+      "id": "אבנים_3",
+      "name": "אבנים 3",
+      "price": 20,
+      "image": "abnym_3.png",
+      "category": "other"
+    },
+    {
+      "id": "אליה",
+      "name": "אליה",
+      "price": 20,
+      "image": "alyh.jpg",
+      "category": "other"
+    },
+    {
+      "id": "אליה_וסבא",
+      "name": "אליה וסבא",
+      "price": 20,
+      "image": "alyh_vsba.jpg",
+      "category": "other"
+    },
+    {
+      "id": "צורי_1",
+      "name": "צורי 1",
+      "price": 20,
+      "image": "tzvry_1.jpg",
+      "category": "other"
+    },
+    {
+      "id": "צורי_2",
+      "name": "צורי 2",
+      "price": 20,
+      "image": "tzvry_2.jpg",
+      "category": "other"
+    },
+    {
+      "id": "צורי_3",
+      "name": "צורי 3",
+      "price": 20,
+      "image": "tzvry_3.jpg",
+      "category": "other"
+    },
+    {
+      "id": "צורי_4",
+      "name": "צורי 4",
+      "price": 20,
+      "image": "tzvry_4.jpg",
+      "category": "other"
+    },
+    {
+      "id": "צורי_5",
+      "name": "צורי 5",
+      "price": 20,
+      "image": "tzvry_5.jpg",
+      "category": "other"
+    },
+    {
+      "id": "צורי_ואליה",
+      "name": "צורי ואליה",
+      "price": 20,
+      "image": "tzvry_valyh.jpg",
+      "category": "other"
+    },
+    {
+      "id": "צורצורררר",
+      "name": "צורצורררר",
+      "price": 20,
+      "image": "tzvrtzvrrrr.jpg",
+      "category": "other"
+    },
+    {
+      "id": "שולחנות",
+      "name": "שולחנות",
+      "price": 20,
+      "image": "shvlchnvt.png",
+      "category": "other"
+    },
+    {
+      "id": "גדר",
+      "name": "גדר",
+      "price": 20,
+      "image": "gdr.png",
+      "category": "structures"
+    },
+    {
+      "id": "גדר_3",
+      "name": "גדר 3",
+      "price": 20,
+      "image": "gdr_3.png",
+      "category": "structures"
+    },
+    {
+      "id": "גדר_איכרים",
+      "name": "גדר איכרים",
+      "price": 20,
+      "image": "gdr_aykrym.png",
+      "category": "structures"
+    },
+    {
+      "id": "גדר_לבנה",
+      "name": "גדר לבנה",
+      "price": 20,
+      "image": "gdr_lbnh.png",
+      "category": "structures"
+    },
+    {
+      "id": "גדר_לבנה_פינה",
+      "name": "גדר לבנה פינה",
+      "price": 20,
+      "image": "gdr_lbnh_pynh.png",
+      "category": "structures"
+    },
+    {
+      "id": "גשר",
+      "name": "גשר",
+      "price": 20,
+      "image": "gshr.png",
+      "category": "structures"
+    },
+    {
+      "id": "גשר_קפוא",
+      "name": "גשר קפוא",
+      "price": 20,
+      "image": "gshr_kpva.png",
+      "category": "structures"
+    },
+    {
+      "id": "חומה",
+      "name": "חומה",
+      "price": 20,
+      "image": "chvmh.png",
+      "category": "structures"
+    },
+    {
+      "id": "עמוד",
+      "name": "עמוד",
+      "price": 20,
+      "image": "amvd.png",
+      "category": "structures"
+    },
+    {
+      "id": "עמוד_2",
+      "name": "עמוד 2",
+      "price": 20,
+      "image": "amvd_2.png",
+      "category": "structures"
+    },
+    {
+      "id": "עמוד_3",
+      "name": "עמוד 3",
+      "price": 20,
+      "image": "amvd_3.png",
+      "category": "structures"
+    },
+    {
+      "id": "קיר",
+      "name": "קיר",
+      "price": 20,
+      "image": "kyr.png",
+      "category": "structures"
+    },
+    {
+      "id": "קיר_עגול",
+      "name": "קיר עגול",
+      "price": 20,
+      "image": "kyr_agvl.png",
+      "category": "structures"
+    },
+    {
+      "id": "קיר_עגול_2",
+      "name": "קיר עגול 2",
+      "price": 20,
+      "image": "kyr_agvl_2.png",
+      "category": "structures"
+    },
+    {
+      "id": "קיר_עגול_3",
+      "name": "קיר עגול 3",
+      "price": 20,
+      "image": "kyr_agvl_3.png",
+      "category": "structures"
+    },
+    {
+      "id": "קיר_פינה",
+      "name": "קיר פינה",
+      "price": 20,
+      "image": "kyr_pynh.png",
+      "category": "structures"
+    },
+    {
+      "id": "רצפה",
+      "name": "רצפה",
+      "price": 20,
+      "image": "rtzph.png",
+      "category": "structures"
+    },
+    {
+      "id": "שער",
+      "name": "שער",
+      "price": 20,
+      "image": "shar.png",
+      "category": "structures"
+    },
+    {
+      "id": "שער_סגור",
+      "name": "שער סגור",
+      "price": 20,
+      "image": "shar_sgvr.png",
+      "category": "structures"
+    },
+    {
+      "id": "חנית_בקרח",
+      "name": "חנית בקרח",
+      "price": 20,
+      "image": "chnyt_bkrch.png",
+      "category": "weapons"
+    },
+    {
+      "id": "חרב",
+      "name": "חרב",
+      "price": 20,
+      "image": "chrb.png",
+      "category": "weapons"
+    },
+    {
+      "id": "כלי_נשק",
+      "name": "כלי נשק",
+      "price": 20,
+      "image": "kly_nshk.png",
+      "category": "weapons"
+    },
+    {
+      "id": "מגן",
+      "name": "מגן",
+      "price": 20,
+      "image": "mgn.png",
+      "category": "weapons"
+    },
+    {
+      "id": "מגן_2",
+      "name": "מגן 2",
+      "price": 20,
+      "image": "mgn_2.png",
+      "category": "weapons"
+    }
+  ],
+  "categories": [
+    "buildings",
+    "characters",
+    "decorations",
+    "effects",
+    "frozen",
+    "furniture",
+    "market",
+    "minecraft",
+    "nature",
+    "other",
+    "structures",
+    "weapons"
+  ]
+}

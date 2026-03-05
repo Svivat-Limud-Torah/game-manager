@@ -1,0 +1,22 @@
+{
+  "name": "game-manager",
+  "version": "1.0.0",
+  "description": "Game Management System - A modern, unified interface for game management",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@dicebear/collection": "^9.4.0",
+    "@dicebear/core": "^9.4.0",
+    "chart.js": "^4.5.1",
+    "electron-store": "^8.1.0",
+    "firebase": "^12.6.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
+}

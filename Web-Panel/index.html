@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f0f1a">
+    <title>KidScreen — לוח הורה</title>
+    <link rel="icon" type="image/png" href="../ICON.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- ==================== LOGIN SCREEN ==================== -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="login-logo">👨‍👧‍👦</div>
+            <h1 class="login-title">KidScreen</h1>
+            <p class="login-subtitle">לוח בקרת הורים</p>
+            
+            <div class="login-form">
+                <div class="form-group">
+                    <label>🔑 קוד משפחה</label>
+                    <input type="text" id="login-family-id" placeholder="הדבק קוד משפחה..." dir="rtl">
+                </div>
+                <button class="btn btn-primary btn-full" id="login-btn" onclick="handleLogin()">🚀 התחבר</button>
+                <p class="login-error hidden" id="login-error"></p>
+                <p class="login-hint">קוד המשפחה נמצא באפליקציה: לוח הורה ← 🔄 סנכרון</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP ==================== -->
+    <div id="app-screen" class="screen">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-right">
+                <span class="topbar-logo">👨‍👧‍👦</span>
+                <span class="topbar-title">KidScreen</span>
+            </div>
+            <div class="topbar-left">
+                <span id="connection-badge" class="conn-badge offline">אופליין</span>
+                <button class="topbar-btn" onclick="handleLogout()" title="התנתק">🚪</button>
+            </div>
+        </header>
+
+        <!-- Tab Navigation (bottom on mobile) -->
+        <nav class="tab-bar">
+            <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                <span class="tab-icon">📊</span>
+                <span class="tab-label">סקירה</span>
+            </button>
+            <button class="tab" data-tab="tasks" onclick="switchTab('tasks')">
+                <span class="tab-icon">📋</span>
+                <span class="tab-label">משימות</span>
+            </button>
+            <button class="tab" data-tab="messages" onclick="switchTab('messages')">
+                <span class="tab-icon">📢</span>
+                <span class="tab-label">הודעות</span>
+            </button>
+            <button class="tab" data-tab="settings" onclick="switchTab('settings')">
+                <span class="tab-icon">⚙️</span>
+                <span class="tab-label">הגדרות</span>
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="content">
+
+            <!-- ===== DASHBOARD TAB ===== -->
+            <section id="tab-dashboard" class="tab-content active">
+                <h2 class="section-title">📊 סקירת ילדים</h2>
+                <div id="children-cards" class="children-grid">
+                    <!-- Dynamically filled -->
+                </div>
+
+                <!-- Pending approvals -->
+                <div id="pending-section" class="card-section hidden">
+                    <h3>🔔 ממתינים לאישור</h3>
+                    <div id="pending-list"></div>
+                </div>
+            </section>
+
+            <!-- ===== CHILD DETAIL MODAL ===== -->
+            <div id="child-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="child-modal-name">—</h3>
+                        <button class="modal-close" onclick="closeChildModal()">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="child-stats-grid" id="child-modal-stats"></div>
+                        
+                        <div class="child-controls">
+                            <h4>⏱️ זמן</h4>
+                            <div class="control-row">
+                                <input type="number" id="child-time-input" min="0" max="480" value="30" class="control-input">
+                                <span class="control-unit">דקות</span>
+                                <button class="btn btn-primary btn-small" onclick="childAddTime()">➕ הוסף</button>
+                                <button class="btn btn-outline btn-small" onclick="childSetTime()">📌 קבע</button>
+                            </div>
+
+                            <h4>💰 מטבעות</h4>
+                            <div class="control-row">
+                                <input type="number" id="child-coins-input" min="0" value="50" class="control-input">
+                                <button class="btn btn-primary btn-small" onclick="childAddCoins()">➕ הוסף</button>
+                                <button class="btn btn-outline btn-small" onclick="childSetCoins()">📌 קבע</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TASKS TAB ===== -->
+            <section id="tab-tasks" class="tab-content">
+                <div class="section-header-row">
+                    <h2 class="section-title">📋 משימות</h2>
+                    <button class="btn btn-primary btn-small" onclick="openNewTaskModal()">➕ חדשה</button>
+                </div>
+                <div id="tasks-list" class="tasks-list">
+                    <!-- Dynamically filled -->
+                </div>
+
+                <!-- New Task Modal -->
+                <div id="new-task-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>📋 משימה חדשה</h3>
+                            <button class="modal-close" onclick="closeNewTaskModal()">✕</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>כותרת</label>
+                                <input type="text" id="task-title" placeholder="למשל: לנקות את החדר">
+                            </div>
+                            <div class="form-group">
+                                <label>תיאור (אופציונלי)</label>
+                                <textarea id="task-desc" rows="2" placeholder="פירוט נוסף..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>💰 פרס (מטבעות)</label>
+                                    <input type="number" id="task-reward" value="50" min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>👤 למי</label>
+                                    <select id="task-assign">
+                                        <option value="all">כל הילדים</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>🔁 חזרה</label>
+                                <select id="task-recurring">
+                                    <option value="none">חד פעמית</option>
+                                    <option value="daily">יומי</option>
+                                    <option value="weekly">שבועי</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary btn-full" onclick="createTask()">✅ צור משימה</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== MESSAGES TAB ===== -->
+            <section id="tab-messages" class="tab-content">
+                <div class="section-header-row">
+                    <h2 class="section-title">📢 הודעות</h2>
+                    <button class="btn btn-primary btn-small" onclick="openNewMsgModal()">➕ חדשה</button>
+                </div>
+                <div id="messages-list" class="messages-list">
+                    <!-- Dynamically filled -->
+                </div>
+
+                <!-- New Message Modal -->
+                <div id="new-msg-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>📢 הודעה חדשה</h3>
+                            <button class="modal-close" onclick="closeNewMsgModal()">✕</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>📝 טקסט ההודעה</label>
+                                <textarea id="msg-text" rows="3" placeholder="שלום לכולם!"></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>👤 למי</label>
+                                    <select id="msg-target">
+                                        <option value="all">כל הילדים</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>⏰ תפוגה (שעות)</label>
+                                    <input type="number" id="msg-expiry" min="0" value="24">
+                                </div>
+                            </div>
+                            <div class="form-group toggle-row">
+                                <label>🔒 הצג במסך נעילה</label>
+                                <input type="checkbox" id="msg-lock">
+                            </div>
+                            <button class="btn btn-primary btn-full" onclick="createMessage()">📤 שלח</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== SETTINGS TAB ===== -->
+            <section id="tab-settings" class="tab-content">
+                <h2 class="section-title">⚙️ הגדרות</h2>
+                
+                <div class="settings-card">
+                    <h3>⏱️ זמן</h3>
+                    <div class="form-group">
+                        <label>זמן חינם יומי (דקות)</label>
+                        <input type="number" id="set-daily-time" min="0" max="480" value="35">
+                    </div>
+                    <div class="form-group">
+                        <label>💰 מחיר דקה (מטבעות)</label>
+                        <input type="number" id="set-coins-per-min" min="1" value="5">
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>📖 שאלות</h3>
+                    <div class="form-group">
+                        <label>מטבעות לשאלה נכונה</label>
+                        <input type="number" id="set-coins-per-answer" min="1" value="10">
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>🕐 חלונות זמן מותרים</h3>
+                    <p class="hint">שעות שבהן ילדים מורשים להתחבר</p>
+                    <div id="time-windows-list"></div>
+                    <button class="btn btn-outline btn-small" onclick="addTimeWindow()">➕ הוסף חלון זמן</button>
+                </div>
+
+                <div class="settings-card">
+                    <h3>🔥 רצף יומי</h3>
+                    <div class="form-group">
+                        <label>🎁 בונוס מטבעות לרצף</label>
+                        <input type="number" id="set-streak-bonus" min="0" value="5">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-full" onclick="saveSettings()">💾 שמור הגדרות</button>
+
+                <div class="settings-card" style="margin-top: 20px;">
+                    <h3>🔄 סנכרון</h3>
+                    <div class="sync-info">
+                        <span>קוד משפחה:</span>
+                        <code id="settings-family-id" dir="ltr">—</code>
+                        <button class="btn btn-outline btn-small" onclick="copyFamilyId()">📋</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
