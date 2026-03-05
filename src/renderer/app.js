@@ -1,5 +1,5 @@
-// ==================== KidScreen App ====================
-// Frontend logic for the KidScreen parental platform
+// ==================== ZmanKef App ====================
+// Frontend logic for the ZmanKef parental platform
 
 let currentUser = null;
 let currentSection = 'dashboard';

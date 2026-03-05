@@ -4,7 +4,7 @@ const ONBOARDING_STEPS = [
     {
         id: 'welcome',
         icon: '👋',
-        title: 'ברוכים הבאים ל-KidScreen! 🎉',
+        title: 'ברוכים הבאים ל-ZmanKef! 🎉',
         body: () => `
             <p class="ob-lead">מערכת חכמה שהופכת את זמן המסך של הילדים ל<strong>הזדמנות ללמידה</strong>.</p>
             <div class="ob-highlight-box">
@@ -62,7 +62,7 @@ const ONBOARDING_STEPS = [
         icon: '🔄',
         title: 'איך זה עובד ביום-יום 📅',
         body: () => `
-            <p class="ob-lead">כך נראה יום רגיל של ילד עם KidScreen:</p>
+            <p class="ob-lead">כך נראה יום רגיל של ילד עם ZmanKef:</p>
             <div class="ob-steps-flow">
                 <div class="ob-flow-item">
                     <div class="ob-flow-num">1</div>

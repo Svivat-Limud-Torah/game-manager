@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎮 KidScreen — מערכת ניהול זמן מסך לילדים
+# 🎮 ZmanKef — מערכת ניהול זמן מסך לילדים
 
 **אפליקציית Electron שמאפשרת להורים לנהל זמן מסך, שאלות ידע, חנות פרסים, ומשחקים לילדים שלהם — הכל בממשק אחד.**
 
@@ -38,7 +38,7 @@
 
 ```bash
 # שכפל את הריפו
-git clone https://github.com/<YOUR_USERNAME>/game-manager.git
+git clone https://github.com/Svivat-Limud-Torah/game-manager.git
 cd game-manager
 
 # התקן את כל החבילות
@@ -59,7 +59,7 @@ npm run dev
 ## 📁 מבנה הפרויקט
 
 ```
-game-manager/
+zmankef/
 ├── src/
 │   ├── main/               # תהליך ראשי של Electron
 │   │   ├── index.js        # נקודת כניסה + IPC

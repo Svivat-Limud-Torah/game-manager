@@ -38,7 +38,7 @@ function createDefaultUser(username, password, displayName, overrides = {}) {
 }
 
 const store = new Store({
-    name: 'kidscreen-platform-data',
+    name: 'zmankef-data',
     defaults: {
         users: {},
         tasks: [],

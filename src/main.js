@@ -31,7 +31,7 @@ function syncToUnity(username, user) {
 
 // ==================== STORE ====================
 const store = new Store({
-    name: 'kidscreen-platform-data',
+    name: 'zmankef-data',
     defaults: {
         users: {
             'admin': {

@@ -1,4 +1,4 @@
-// ==================== KidScreen Web Panel ====================
+// ==================== ZmanKef Web Panel ====================
 // Connects directly to Firebase RTDB — same data the Electron app syncs with
 
 const firebaseConfig = {

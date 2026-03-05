@@ -1,7 +1,7 @@
 {
-  "name": "game-manager",
+  "name": "zmankef",
   "version": "1.0.0",
-  "description": "Game Management System - A modern, unified interface for game management",
+  "description": "ZmanKef - Parental screen time manager with gamification for kids",
   "main": "src/main/index.js",
   "scripts": {
     "start": "electron .",
